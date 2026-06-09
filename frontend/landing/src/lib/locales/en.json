@@ -1,0 +1,103 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "faq": "FAQ",
+    "docs": "Docs",
+    "startFree": "Start Free",
+    "login": "Institution Login"
+  },
+  "hero": {
+    "badge": "Next-Gen Donation Platform",
+    "title": "Transparent Donations & Zero Platform Fee Deductions",
+    "subtitle": "An open-source crowdfunding platform built specifically for Zakat and Humanitarian Institutions. Self-Hosted version is 100% free of platform fees. Managed Cloud SaaS starts from 1%.",
+    "cta_primary": "Get Started",
+    "cta_secondary": "Explore License",
+    "stats_platform_fee": "Platform Fee",
+    "stats_transparency": "Transparency",
+    "stats_open_source": "Source Code"
+  },
+  "stats": {
+    "header": "Why Kebaikanku?",
+    "subheader": "Comparing traditional commercial donation platforms with kebaikanku.id",
+    "traditional_title": "Traditional Platforms",
+    "traditional_fee": "5% - 12% Deduction Fee",
+    "traditional_desc": "Automatically deducted from public donations to fund commercial platform operations.",
+    "our_title": "kebaikanku.id (Self-Hosted)",
+    "our_fee": "0% Platform Deduction",
+    "our_desc": "100% of donations go directly to your organization. Pay payment gateway fees directly to the vendor.",
+    "cloud_title": "kebaikanku.id (Managed Cloud)",
+    "cloud_fee": "Starts at Just 1%",
+    "cloud_desc": "Ultra-low fee to cover cloud server hosting, automated maintenance, and hassle-free instant setup."
+  },
+  "features": {
+    "badge": "Key Features",
+    "title": "The Future of Humanitarian Fundraising",
+    "subtitle": "Combining modern open-source technology and AI automation for your organization's efficiency.",
+    "f1_title": "AI Distribution Reports",
+    "f1_desc": "Upload receipt photos and short voice/text notes. The AI drafts a neat distribution report and blasts updates directly to donors' WhatsApp.",
+    "f2_title": "Automated Zakat Certificates",
+    "f2_desc": "Automatically issue official Zakat receipts (Bukti Setor Zakat) that donors can download for annual tax deductions.",
+    "f3_title": "WhatsApp AI Donation (Roadmap)",
+    "f3_desc": "Donors chat on WhatsApp; the AI CS guides them through zakat calculations and generates a dynamic QRIS for instant payments.",
+    "f4_title": "Shared Inbox & Multi-User WA (Roadmap)",
+    "f4_desc": "Manage your official organization WhatsApp number with multiple branch admins in one centralized dashboard.",
+    "f5_title": "Detachable Multi-Database",
+    "f5_desc": "Use lightweight SQLite for testing, and dynamically migrate to PostgreSQL for enterprise-scale workloads.",
+    "f6_title": "100% Data Sovereignty",
+    "f6_desc": "All donor and beneficiary data belongs entirely to your organization. Zero commercial data monetization."
+  },
+  "pricing": {
+    "title": "License & Deployment Options",
+    "subtitle": "Choose the implementation model that fits your organization's IT capacity.",
+    "self_title": "Self-Hosted (Open-Source)",
+    "self_price": "$0",
+    "self_period": "forever",
+    "self_desc": "Download the source code for free and deploy it on your own server infrastructure.",
+    "self_f1": "AGPL-3.0 License (Must open-source changes if hosted as SaaS)",
+    "self_f2": "0% Kebaikanku Platform Fees",
+    "self_f3": "Connect your own Midtrans account",
+    "self_f4": "Setup & server maintenance managed by your own IT team",
+    "self_cta": "Download on GitHub",
+    
+    "cloud_title": "Managed Cloud SaaS",
+    "cloud_price": "Starts 1%",
+    "cloud_period": "per transaction",
+    "cloud_desc": "Hosted on our managed cloud servers. Ready to use in 5 minutes.",
+    "cloud_f1": "Instant setup without server/coding knowledge",
+    "cloud_f2": "Very low platform fee (1% per successful donation)",
+    "cloud_f3": "Automated updates and daily database backups",
+    "cloud_f4": "Technical support via WhatsApp and Email",
+    "cloud_cta": "Register for Cloud Now",
+    
+    "ent_title": "Enterprise & White-Label",
+    "ent_price": "Contact Us",
+    "ent_period": "contract / setup fee",
+    "ent_desc": "For national-scale organizations needing custom branding, custom APIs, and dedicated SLA.",
+    "ent_f1": "Commercial License (White-labeling / Remove our branding)",
+    "ent_f2": "Assisted installation directly on your internal servers (On-Premise)",
+    "ent_f3": "Custom API integrations with internal legacy systems",
+    "ent_f4": "24/7 technical support and staff training sessions",
+    "ent_cta": "Contact CS on WhatsApp"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Get quick answers about the kebaikanku.id platform",
+    "q1": "Is it really 0% platform fee?",
+    "a1": "Yes, if you self-host the open-source version, kebaikanku.id charges zero platform fees. However, you will still pay Midtrans transaction fees directly at their standard rates (usually Rp 2,000 - Rp 4,000 for Virtual Accounts, or 0.7% for QRIS).",
+    "q2": "What is the difference between Self-Hosted and Managed Cloud?",
+    "a2": "The Self-Hosted version requires an IT team to manage code, set up servers, install databases, and handle maintenance. The Managed Cloud version is fully hosted by us: you register, upload verification documents, and start receiving donations in 5 minutes without server worries.",
+    "q3": "Why do you use the AGPL-3.0 license?",
+    "a3": "The AGPL-3.0 license ensures the project remains open and beneficial. Anyone is free to modify it, but if they host it as a web service (SaaS), they must open-source their changes so the community can learn and build together.",
+    "q4": "How does the AI Report Generator work?",
+    "a4": "It simplifies reporting. Field staff upload receipt photos or documentation and a short note (or voice note). The AI (CrewAI) compiles a clean report, publishes it, and automatically updates donors via WhatsApp."
+  },
+  "footer": {
+    "desc": "The first open-source, fully transparent donation and crowdfunding platform in Indonesia for independent zakat and humanitarian institutions.",
+    "links_title": "Quick Links",
+    "legal_title": "Legal",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "copyright": "© 2026 kebaikanku.id. Built with love for community independence."
+  }
+}

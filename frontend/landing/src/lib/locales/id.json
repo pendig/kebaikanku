@@ -1,0 +1,103 @@
+{
+  "nav": {
+    "features": "Fitur",
+    "pricing": "Biaya",
+    "faq": "Tanya Jawab",
+    "docs": "Dokumentasi",
+    "startFree": "Mulai Gratis",
+    "login": "Masuk Yayasan"
+  },
+  "hero": {
+    "badge": "Platform Donasi Era Baru",
+    "title": "Donasi Transparan & Bebas Potongan Biaya Platform",
+    "subtitle": "Platform crowdfunding open-source khusus untuk Lembaga Zakat dan Kemanusiaan. Versi Self-Hosted 100% Bebas Biaya Platform. Cloud SaaS mulai dari 1%.",
+    "cta_primary": "Mulai Hubungkan Lembaga",
+    "cta_secondary": "Pelajari Lisensi",
+    "stats_platform_fee": "Biaya Platform",
+    "stats_transparency": "Transparansi Dana",
+    "stats_open_source": "Kode Sumber"
+  },
+  "stats": {
+    "header": "Mengapa Kebaikanku Berbeda?",
+    "subheader": "Perbandingan platform donasi konvensional dengan kebaikanku.id",
+    "traditional_title": "Platform Konvensional",
+    "traditional_fee": "Potongan Biaya 5% - 12%",
+    "traditional_desc": "Dipotong otomatis dari donasi publik untuk biaya operasional platform komersial.",
+    "our_title": "kebaikanku.id (Self-Hosted)",
+    "our_fee": "0% Potongan Platform",
+    "our_desc": "100% donasi masuk ke rekening lembaga Anda. Bayar biaya payment gateway langsung ke vendor.",
+    "cloud_title": "kebaikanku.id (Managed Cloud)",
+    "cloud_fee": "Mulai dari 1% Saja",
+    "cloud_desc": "Biaya sangat rendah untuk kebutuhan server, maintenance otomatis, dan setup instan tanpa repot."
+  },
+  "features": {
+    "badge": "Fitur Unggulan",
+    "title": "Masa Depan Penggalangan Dana Kemanusiaan",
+    "subtitle": "Kombinasi teknologi open-source modern dan otomatisasi AI untuk efisiensi lembaga Anda.",
+    "f1_title": "Laporan Penyaluran AI (AI Report)",
+    "f1_desc": "Unggah foto nota dan deskripsi suara/teks singkat. AI akan menyusun laporan penyaluran yang rapi dan mem-blasting update langsung ke WhatsApp donatur.",
+    "f2_title": "Sertifikat Zakat Otomatis",
+    "f2_desc": "Keluarkan Bukti Setor Zakat (BSZ) resmi secara otomatis yang dapat diunduh donatur untuk pengurang pajak tahunan (e-spt).",
+    "f3_title": "Donasi AI via WhatsApp (Roadmap)",
+    "f3_desc": "Calon donatur cukup mengirim pesan di WA, CS AI akan membimbing kalkulasi zakat dan mengirim dynamic QRIS untuk pembayaran langsung.",
+    "f4_title": "Shared Inbox & Multi-User WA (Roadmap)",
+    "f4_desc": "Kelola satu nomor WhatsApp resmi lembaga zakat oleh banyak admin/kantor cabang di dashboard terpusat.",
+    "f5_title": "Multi-Database Lepas Pasang",
+    "f5_desc": "Gunakan SQLite yang super ringan untuk uji coba atau migrasi instan ke PostgreSQL untuk performa skala enterprise.",
+    "f6_title": "100% Berdaulat atas Data",
+    "f6_desc": "Semua data Muzakki (Donatur) dan Mustahik (Penerima) adalah milik lembaga Anda sepenuhnya. Tidak ada eksploitasi data komersial."
+  },
+  "pricing": {
+    "title": "Pilihan Lisensi & Setup",
+    "subtitle": "Pilih metode implementasi yang paling sesuai dengan kapasitas tim IT lembaga Anda.",
+    "self_title": "Self-Hosted (Open-Source)",
+    "self_price": "Rp 0",
+    "self_period": "selamanya",
+    "self_desc": "Unduh kode sumber secara gratis dan pasang di server mandiri.",
+    "self_f1": "Lisensi AGPL-3.0 (Wajib Open-Source jika modifikasi SaaS)",
+    "self_f2": "0% Biaya Platform Kebaikanku",
+    "self_f3": "Hubungkan akun Midtrans milik sendiri",
+    "self_f4": "Setup & pemeliharaan server secara mandiri oleh tim IT Anda",
+    "self_cta": "Unduh di GitHub",
+    
+    "cloud_title": "Managed Cloud SaaS",
+    "cloud_price": "Mulai 1%",
+    "cloud_period": "per transaksi",
+    "cloud_desc": "Kami host di server cloud terkelola kami. Siap pakai dalam 5 menit.",
+    "cloud_f1": "Setup instan tanpa perlu paham server/coding",
+    "cloud_f2": "Biaya platform sangat rendah (1% per donasi sukses)",
+    "cloud_f3": "Update sistem otomatis dan backup database harian",
+    "cloud_f4": "Dukungan teknis via WhatsApp / Email",
+    "cloud_cta": "Daftar Cloud Sekarang",
+    
+    "ent_title": "Enterprise & White-Label",
+    "ent_price": "Hubungi Kami",
+    "ent_period": "kontrak / setup fee",
+    "ent_desc": "Untuk lembaga skala nasional yang membutuhkan custom branding dan support khusus.",
+    "ent_f1": "Lisensi Komersial Khusus (White-Label / Hapus logo kami)",
+    "ent_f2": "Bantuan instalasi langsung di server internal (On-Premise)",
+    "ent_f3": "Integrasi custom API internal lembaga",
+    "ent_f4": "SLA Dukungan Teknis 24/7 dan Training Staf",
+    "ent_cta": "Hubungi WhatsApp CS"
+  },
+  "faq": {
+    "title": "Pertanyaan yang Sering Diajukan",
+    "subtitle": "Temukan jawaban cepat seputar platform kebaikanku.id",
+    "q1": "Apakah benar-benar 0% biaya platform?",
+    "a1": "Ya, jika Anda menggunakan versi Self-Hosted, kebaikanku.id tidak memungut biaya platform sepeser pun. Namun, Anda tetap harus membayar biaya transaksi Midtrans sesuai tarif standar mereka (biasanya Rp 2.000 - Rp 4.000 untuk Virtual Account atau 0.7% untuk QRIS).",
+    "q2": "Apa perbedaan versi Self-Hosted dan Managed Cloud?",
+    "a2": "Versi Self-Hosted mengharuskan Anda memiliki tim IT untuk mengunduh kode, membeli server, menginstal database, dan memelihara server tersebut. Versi Managed Cloud di-host penuh oleh tim kami sehingga lembaga Anda tinggal mendaftar, melengkapi berkas, dan langsung siap menerima donasi dalam 5 menit tanpa memikirkan server.",
+    "q3": "Mengapa menggunakan lisensi AGPL-3.0?",
+    "a3": "Lisensi AGPL-3.0 memastikan proyek ini tetap terbuka dan bermanfaat bagi umat. Siapa pun boleh memodifikasinya, namun jika mereka menjadikannya layanan web berbayar (SaaS), mereka wajib membuka kode hasil modifikasi mereka agar komunitas bisa terus belajar dan berkembang bersama.",
+    "q4": "Bagaimana cara kerja AI Report Generator?",
+    "a4": "Fitur ini mempermudah pelaporan. Staf lapangan cukup mengunggah foto kuitansi atau dokumentasi kegiatan kemanusiaan melalui dashboard, lalu mengetikkan catatan singkat (atau mengirim pesan suara). AI (CrewAI) akan menyusun teks laporan yang rapi dan mempublikasikannya, sekaligus mengirim update tersebut via WhatsApp ke para donatur campaign terkait."
+  },
+  "footer": {
+    "desc": "Platform donasi dan crowdfunding open-source transparan pertama di Indonesia untuk lembaga zakat dan kemanusiaan mandiri.",
+    "links_title": "Tautan Cepat",
+    "legal_title": "Legalitas",
+    "terms": "Syarat & Ketentuan",
+    "privacy": "Kebijakan Privasi",
+    "copyright": "© 2026 kebaikanku.id. Dibuat dengan cinta untuk kemandirian umat."
+  }
+}

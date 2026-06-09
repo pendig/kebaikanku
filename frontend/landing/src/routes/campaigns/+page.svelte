@@ -186,7 +186,7 @@
 							<!-- Institution & Badge -->
 							<div class="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
 								<span>{campaign.institution}</span>
-								<span class="px-2.5 py-0.5 rounded-full border border-teal-200 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/5 text-teal-650 dark:text-teal-400 font-semibold uppercase">
+								<span class="px-2.5 py-0.5 rounded-full border border-teal-200 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/5 text-teal-600 dark:text-teal-400 font-semibold uppercase">
 									{campaign.category}
 								</span>
 							</div>
@@ -197,7 +197,7 @@
 							</h3>
 							
 							<!-- Description -->
-							<p class="text-gray-650 dark:text-gray-400 text-xs leading-relaxed line-clamp-3">
+							<p class="text-gray-600 dark:text-gray-400 text-xs leading-relaxed line-clamp-3">
 								{campaign.description}
 							</p>
 						</div>
@@ -272,10 +272,10 @@
 
 				<div class="space-y-2">
 					<h3 class="text-xl font-bold text-gray-900 dark:text-white">Integrasi Pembayaran Sedang Diproses</h3>
-					<span class="text-xs font-semibold text-emerald-650 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block uppercase">
+					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block uppercase">
 						Midtrans Snap API
 					</span>
-					<p class="text-xs text-gray-650 dark:text-gray-400 leading-relaxed pt-2">
+					<p class="text-xs text-gray-600 dark:text-gray-400 leading-relaxed pt-2">
 						Sistem donasi langsung dan payment gateway Midtrans untuk kampanye <strong class="text-gray-900 dark:text-white">"{activeCampaign.title}"</strong> saat ini sedang dibangun dalam roadmap MVP.
 					</p>
 				</div>

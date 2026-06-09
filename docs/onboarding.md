@@ -50,7 +50,7 @@ Follow this checklist to get the project running locally.
    ```bash
    npm run dev
    ```
-4. Open your browser and navigate to `http://localhost:5173`.
+4. Open your browser and navigate to `http://localhost:8383`.
 
 ### Known Limitations (Local SQLite)
 - By default, the backend runs on **SQLite** (`DB_DRIVER=sqlite` and `DB_DSN=kebaikanku.db`).

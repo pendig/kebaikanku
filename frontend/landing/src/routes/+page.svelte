@@ -132,39 +132,39 @@
 			<!-- Traditional Platforms -->
 			<div class="bg-gray-100/30 dark:bg-gray-950/30 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 space-y-6 relative overflow-hidden group glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-xl rounded-full"></div>
-				<div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-150 dark:border-red-500/10 flex items-center justify-center text-red-650 dark:text-red-400 group-hover:scale-110 transition-transform duration-300">
+				<div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/10 flex items-center justify-center text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform duration-300">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-pulse-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
 					</svg>
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 dark:text-white">{$t('stats.traditional_title')}</h3>
-				<div class="text-3xl font-extrabold text-red-650 dark:text-red-400">{$t('stats.traditional_fee')}</div>
+				<div class="text-3xl font-extrabold text-red-600 dark:text-red-400">{$t('stats.traditional_fee')}</div>
 				<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{$t('stats.traditional_desc')}</p>
 			</div>
 
 			<!-- Our Self-Hosted Model -->
 			<div class="bg-gradient-to-b from-emerald-500/5 to-transparent border border-emerald-200 dark:border-emerald-500/20 rounded-2xl p-8 space-y-6 relative overflow-hidden shadow-sm dark:shadow-lg dark:shadow-emerald-500/5 glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-xl rounded-full"></div>
-				<div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-650 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+				<div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
 					</svg>
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 dark:text-white">{$t('stats.our_title')}</h3>
-				<div class="text-3xl font-extrabold text-emerald-650 dark:text-emerald-400">{$t('stats.our_fee')}</div>
+				<div class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{$t('stats.our_fee')}</div>
 				<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{$t('stats.our_desc')}</p>
 			</div>
 
 			<!-- Our Cloud Model -->
 			<div class="bg-gray-100/30 dark:bg-gray-950/30 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 space-y-6 relative overflow-hidden group glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 blur-xl rounded-full"></div>
-				<div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-500/5 border border-teal-150 dark:border-teal-500/10 flex items-center justify-center text-teal-650 dark:text-teal-400 group-hover:scale-110 transition-transform duration-300">
+				<div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-500/5 border border-teal-200 dark:border-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform duration-300">
 					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-float" style="animation-delay: 1s;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
 					</svg>
 				</div>
 				<h3 class="text-xl font-bold text-gray-900 dark:text-white">{$t('stats.cloud_title')}</h3>
-				<div class="text-3xl font-extrabold text-teal-650 dark:text-teal-400">{$t('stats.cloud_fee')}</div>
+				<div class="text-3xl font-extrabold text-teal-600 dark:text-teal-400">{$t('stats.cloud_fee')}</div>
 				<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{$t('stats.cloud_desc')}</p>
 			</div>
 		</div>
@@ -174,7 +174,7 @@
 <!-- Features Grid -->
 <section id="features" class="py-24 max-w-7xl mx-auto px-6">
 	<div class="text-center space-y-4 mb-20">
-		<span class="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-250 dark:border-emerald-500/10 px-3 py-1 rounded-full">
+		<span class="text-xs font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 px-3 py-1 rounded-full">
 			{$t('features.badge')}
 		</span>
 		<h2 class="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white max-w-3xl mx-auto leading-tight">
@@ -188,7 +188,7 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 		<!-- Feature 1 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-150 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
 				</svg>
@@ -199,7 +199,7 @@
 
 		<!-- Feature 2 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-150 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path class="animate-draw" stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
 				</svg>
@@ -210,7 +210,7 @@
 
 		<!-- Feature 3 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-500/5 border border-teal-150 dark:border-teal-500/10 text-teal-650 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-500/5 border border-teal-200 dark:border-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
 					<circle cx="9" cy="12" r="1.2" fill="currentColor" class="animate-typing-dot-1" />
@@ -224,7 +224,7 @@
 
 		<!-- Feature 4 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-500/5 border border-teal-150 dark:border-teal-500/10 text-teal-650 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-teal-50 dark:bg-teal-500/5 border border-teal-200 dark:border-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path class="animate-float" stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
 				</svg>
@@ -235,7 +235,7 @@
 
 		<!-- Feature 5 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-150 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<path class="animate-float" stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
 				</svg>
@@ -246,7 +246,7 @@
 
 		<!-- Feature 6 -->
 		<div class="bg-white dark:bg-gray-950/20 border border-gray-200 dark:border-gray-900 rounded-2xl p-7 hover:border-emerald-500/30 hover:bg-slate-50 dark:hover:bg-gray-950/40 transition-all duration-300 group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-150 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+			<div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<!-- Animated lock shackle -->
 					<path class="transition-transform duration-300 group-hover:-translate-y-0.75" stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0v4" />
@@ -272,7 +272,7 @@
 			<!-- Self-Hosted Open-Source -->
 			<div class="bg-slate-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 flex flex-col justify-between space-y-8 relative group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="space-y-6">
-					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-250 dark:border-emerald-500/10 inline-block">
+					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
 						{$t('pricing.self_title')}
 					</span>
 					<div class="flex items-baseline space-x-1">
@@ -324,14 +324,14 @@
 					Most Popular
 				</div>
 				<div class="space-y-6">
-					<span class="text-xs font-semibold text-emerald-650 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
+					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
 						{$t('pricing.cloud_title')}
 					</span>
 					<div class="flex items-baseline space-x-1">
 						<span class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">{$t('pricing.cloud_price')}</span>
 						<span class="text-gray-500 text-sm">/ {$t('pricing.cloud_period')}</span>
 					</div>
-					<p class="text-gray-650 dark:text-gray-400 text-sm">{$t('pricing.cloud_desc')}</p>
+					<p class="text-gray-600 dark:text-gray-400 text-sm">{$t('pricing.cloud_desc')}</p>
 					<hr class="border-gray-300 dark:border-gray-800" />
 					<ul class="space-y-3.5 text-sm">
 						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
@@ -371,13 +371,13 @@
 			<!-- Enterprise / White-Label -->
 			<div class="bg-slate-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 flex flex-col justify-between space-y-8 relative group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="space-y-6">
-					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-250 dark:border-emerald-500/10 inline-block">
+					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
 						{$t('pricing.ent_title')}
 					</span>
 					<div class="flex items-baseline space-x-1">
 						<span class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">{$t('pricing.ent_price')}</span>
 					</div>
-					<p class="text-gray-650 dark:text-gray-400 text-sm">{$t('pricing.ent_desc')}</p>
+					<p class="text-gray-600 dark:text-gray-400 text-sm">{$t('pricing.ent_desc')}</p>
 					<hr class="border-gray-200 dark:border-gray-900" />
 					<ul class="space-y-3.5 text-sm">
 						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">

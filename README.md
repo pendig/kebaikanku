@@ -75,7 +75,7 @@ npm install
 npm run dev
 ```
 
-The landing page starts on `http://localhost:5173` by default.
+The landing page starts on `http://localhost:8383` by default.
 
 See [frontend/landing/README.md](frontend/landing/README.md) for local development, static build, localization, and Cloudflare Pages deployment notes.
 

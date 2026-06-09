@@ -81,9 +81,9 @@
 			{#if !isSubmitted}
 				<div class="space-y-6">
 					<!-- Badge -->
-					<div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-teal-200 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/5 text-xs font-semibold text-teal-650 dark:text-teal-400">
+					<div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-teal-200 dark:border-teal-500/20 bg-teal-50 dark:bg-teal-500/5 text-xs font-semibold text-teal-600 dark:text-teal-400">
 						<span class="flex h-2 w-2 relative">
-							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-450 opacity-75"></span>
+							<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
 							<span class="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
 						</span>
 						<span>Dashboard coming soon</span>
@@ -93,13 +93,13 @@
 					<h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-tight">
 						{$t('coming_soon.title')}
 					</h1>
-					<p class="text-gray-650 dark:text-gray-400 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
+					<p class="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed max-w-lg mx-auto">
 						{$t('coming_soon.subtitle')}
 					</p>
 
-					<div class="py-4 px-6 rounded-2xl bg-gray-55 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800/50 max-w-md mx-auto text-left space-y-2">
-						<div class="flex items-center space-x-2 text-xs font-semibold text-gray-550 dark:text-gray-400 uppercase tracking-wider">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-555 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+					<div class="py-4 px-6 rounded-2xl bg-gray-50 dark:bg-gray-900/30 border border-gray-200 dark:border-gray-800/50 max-w-md mx-auto text-left space-y-2">
+						<div class="flex items-center space-x-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
 							</svg>
 							<span>Dashboard Roadmap</span>
@@ -165,7 +165,7 @@
 					<h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 dark:text-white">
 						{$t('coming_soon.success_title')}
 					</h2>
-					<p class="text-gray-650 dark:text-gray-400 text-sm md:text-base leading-relaxed max-w-md mx-auto">
+					<p class="text-gray-600 dark:text-gray-400 text-sm md:text-base leading-relaxed max-w-md mx-auto">
 						{$t('coming_soon.success_desc')}
 					</p>
 

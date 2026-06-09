@@ -1,0 +1,23 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Agent metadata
+.agent/
+.agents/
+.antigravity/
+/src/
+
+
+
+# Frontend local configurations and builds
+frontend/landing/.env
+frontend/landing/build/
+frontend/landing/.svelte-kit/
+frontend/landing/node_modules/
+frontend/landing/package-lock.json
+
+# Backend local configurations and builds
+backend/.env
+backend/kebaikanku.db
+backend/bin/

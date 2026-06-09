@@ -5,7 +5,9 @@
     "faq": "Tanya Jawab",
     "docs": "Dokumentasi",
     "startFree": "Mulai Gratis",
-    "login": "Masuk Yayasan"
+    "login": "Masuk Yayasan",
+    "campaigns": "Kampanye",
+    "dashboard": "Dashboard"
   },
   "hero": {
     "badge": "Platform Donasi Era Baru",
@@ -99,5 +101,29 @@
     "terms": "Syarat & Ketentuan",
     "privacy": "Kebijakan Privasi",
     "copyright": "© 2026 kebaikanku.id. Dibuat dengan cinta untuk kemandirian umat."
+  },
+  "coming_soon": {
+    "title": "Dashboard Pengelola Kampanye",
+    "subtitle": "Fitur ini sedang dalam tahap pengembangan aktif oleh komunitas open-source kami.",
+    "waitlist_title": "Bergabung ke Antrean Waitlist",
+    "waitlist_desc": "Dapatkan notifikasi instan saat dashboard dan integrasi payment gateway Midtrans siap dirilis untuk umum.",
+    "placeholder_email": "Masukkan email lembaga Anda...",
+    "btn_submit": "Gabung Waitlist",
+    "success_title": "Terima Kasih!",
+    "success_desc": "Email Anda telah terdaftar dalam antrean prioritas. Kami akan mengirimkan update berkala mengenai roadmap rilis kebaikanku.id.",
+    "back_home": "Kembali ke Beranda"
+  },
+  "campaigns": {
+    "title": "Daftar Kampanye Kemanusiaan",
+    "subtitle": "Bantu ringankan beban sesama melalui kampanye yang transparan dan akuntabel di bawah ini.",
+    "filter_all": "Semua",
+    "filter_zakat": "Zakat",
+    "filter_kemanusiaan": "Kemanusiaan",
+    "filter_infak": "Infak & Sedekah",
+    "search_placeholder": "Cari kampanye...",
+    "days_left": "hari lagi",
+    "collected": "Terkumpul",
+    "target": "Target",
+    "donate_now": "Donasi Sekarang"
   }
 }

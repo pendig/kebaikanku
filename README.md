@@ -1,3 +1,5 @@
+![kebaikanku.id Social Preview](docs/social-preview.png)
+
 # kebaikanku.id
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
@@ -73,7 +75,7 @@ npm install
 npm run dev
 ```
 
-The landing page starts on `http://localhost:5173` by default.
+The landing page starts on `http://localhost:8383` by default.
 
 See [frontend/landing/README.md](frontend/landing/README.md) for local development, static build, localization, and Cloudflare Pages deployment notes.
 
@@ -88,6 +90,8 @@ See [frontend/landing/README.md](frontend/landing/README.md) for local developme
 - [Localization strategy](docs/localization.md)
 - [Roadmap](docs/roadmap.md)
 - [Project handover](docs/handover.md)
+- [Developer onboarding & runbook](docs/onboarding.md)
+- [Landing page static deployment checklist](docs/deployment_checklist.md)
 
 ## Payment Gateway
 

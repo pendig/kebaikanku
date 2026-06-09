@@ -1,1 +1,117 @@
 @import 'tailwindcss';
+
+@theme {
+  --color-emerald-50: #f3fbf2;
+  --color-emerald-100: #e3f6df;
+  --color-emerald-200: #c7edbe;
+  --color-emerald-300: #a1df93;
+  --color-emerald-400: #73cd60;
+  --color-emerald-500: #4EB73D;
+  --color-emerald-600: #3c962c;
+  --color-emerald-700: #307525;
+  --color-emerald-800: #295e21;
+  --color-emerald-900: #234e1d;
+  --color-emerald-950: #102b0c;
+
+  --color-teal-50: #fefbf0;
+  --color-teal-100: #fdf5d1;
+  --color-teal-200: #fae79c;
+  --color-teal-300: #f7d45a;
+  --color-teal-400: #f4c122;
+  --color-teal-500: #FAB100;
+  --color-teal-600: #d49200;
+  --color-teal-700: #a16a00;
+  --color-teal-800: #7e5200;
+  --color-teal-900: #674200;
+  --color-teal-950: #3a2200;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light dark;
+  --bg-color: #ffffff;
+  --text-color: #0f172a;
+}
+
+:root.dark {
+  --bg-color: #0b0f19;
+  --text-color: #f3f4f6;
+}
+
+html, body {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Cursor Glow Card Effect variables */
+:root {
+  --glow-bg: rgba(16, 185, 129, 0.05);
+  --glow-border: rgba(20, 184, 166, 0.08);
+}
+
+:root.dark {
+  --bg-color: #0b0f19;
+  --text-color: #f3f4f6;
+  --glow-bg: rgba(20, 184, 166, 0.06);
+  --glow-border: rgba(16, 185, 129, 0.15);
+}
+
+/* Glow Card Base Styling */
+.glow-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Border Glow */
+.glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    300px circle at var(--x, 0px) var(--y, 0px),
+    var(--glow-border),
+    transparent 80%
+  );
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Inner Background Glow */
+.glow-card::after {
+  content: '';
+  position: absolute;
+  inset: 0px;
+  border-radius: inherit;
+  background: radial-gradient(
+    250px circle at var(--x, 0px) var(--y, 0px),
+    var(--glow-bg),
+    transparent 80%
+  );
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.glow-card:hover::before,
+.glow-card:hover::after {
+  opacity: 1;
+}
+
+/* Ensure child content stays on top of glow layers */
+.glow-card > *:not(.absolute) {
+  position: relative;
+  z-index: 10;
+}
+

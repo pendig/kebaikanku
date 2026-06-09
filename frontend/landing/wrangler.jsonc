@@ -1,0 +1,17 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "kebaikanku-landing",
+	"compatibility_date": "2026-06-09",
+	"preview_urls": false,
+	"assets": {
+		"directory": "./build"
+	},
+	"vars": {
+		"PUBLIC_SEO_SITE_NAME": "kebaikanku.id",
+		"PUBLIC_SEO_TITLE": "kebaikanku.id - Transparent Donation Platform",
+		"PUBLIC_SEO_DESCRIPTION": "Open-source crowdfunding and donation platform for zakat and kemanusiaan institutions. 0% platform fee for self-hosted.",
+		"PUBLIC_SEO_SITE_URL": "https://kebaikanku.id",
+		"PUBLIC_SEO_IMAGE": "/images/og-image.png",
+		"PUBLIC_SEO_KEYWORDS": "donasi, zakat, open-source, crowdfunding, infak, sedekah, kemanusiaan, yayasan, filantropi"
+	}
+}

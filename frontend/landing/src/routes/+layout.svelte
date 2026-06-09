@@ -4,16 +4,18 @@
 	import { t, locale } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { 
-		PUBLIC_SEO_SITE_NAME, 
-		PUBLIC_SEO_TITLE, 
-		PUBLIC_SEO_DESCRIPTION, 
-		PUBLIC_SEO_SITE_URL, 
+	import { env } from '$env/dynamic/public';
+
+	const {
+		PUBLIC_SEO_SITE_NAME,
+		PUBLIC_SEO_TITLE,
+		PUBLIC_SEO_DESCRIPTION,
+		PUBLIC_SEO_SITE_URL,
 		PUBLIC_SEO_IMAGE,
 		PUBLIC_SEO_KEYWORDS,
 		PUBLIC_GA_TRACKING_ID,
 		PUBLIC_GTM_CONTAINER_ID
-	} from '$env/static/public';
+	} = env;
 
 	const siteName = PUBLIC_SEO_SITE_NAME || 'kebaikanku.id';
 	const siteTitle = PUBLIC_SEO_TITLE || 'kebaikanku.id - Transparent Donation Platform';

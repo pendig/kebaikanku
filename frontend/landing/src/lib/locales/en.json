@@ -5,7 +5,9 @@
     "faq": "FAQ",
     "docs": "Docs",
     "startFree": "Start Free",
-    "login": "Institution Login"
+    "login": "Institution Login",
+    "campaigns": "Campaigns",
+    "dashboard": "Dashboard"
   },
   "hero": {
     "badge": "Next-Gen Donation Platform",
@@ -99,5 +101,29 @@
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
     "copyright": "© 2026 kebaikanku.id. Built with love for community independence."
+  },
+  "coming_soon": {
+    "title": "Campaign Management Dashboard",
+    "subtitle": "This feature is currently under active development by our open-source community.",
+    "waitlist_title": "Join the Waitlist",
+    "waitlist_desc": "Get notified as soon as the dashboard and Midtrans payment gateway integrations are ready for public release.",
+    "placeholder_email": "Enter your organization's email...",
+    "btn_submit": "Join Waitlist",
+    "success_title": "Thank You!",
+    "success_desc": "Your email has been added to our priority waitlist queue. We will send you regular updates regarding the kebaikanku.id release roadmap.",
+    "back_home": "Back to Homepage"
+  },
+  "campaigns": {
+    "title": "Humanitarian Campaigns",
+    "subtitle": "Help ease the burden of others through transparent and accountable campaigns below.",
+    "filter_all": "All",
+    "filter_zakat": "Zakat",
+    "filter_kemanusiaan": "Humanitarian",
+    "filter_infak": "Infak & Alms",
+    "search_placeholder": "Search campaigns...",
+    "days_left": "days left",
+    "collected": "Collected",
+    "target": "Target",
+    "donate_now": "Donate Now"
   }
 }

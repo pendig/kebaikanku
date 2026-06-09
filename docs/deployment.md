@@ -33,6 +33,22 @@ Settings:
 | Build output directory | `build` |
 | Node version | `18` or newer |
 
+### Environment Variables (SEO Configuration)
+
+The static landing page is configured at build-time using public environment variables. In production, these should be set in your Cloudflare Pages dashboard (or equivalent hosting platform) environment configuration.
+
+| Variable | Description | Example / Default |
+| --- | --- | --- |
+| `PUBLIC_SEO_SITE_NAME` | The brand or site name used in metadata. | `kebaikanku.id` |
+| `PUBLIC_SEO_TITLE` | The default browser title bar text for the home page. | `kebaikanku.id - Transparent Donation Platform` |
+| `PUBLIC_SEO_DESCRIPTION` | The default site description meta tag for search engines. | `Open-source crowdfunding and donation platform for zakat and kemanusiaan institutions. 0% platform fee for self-hosted.` |
+| `PUBLIC_SEO_SITE_URL` | The absolute canonical root URL of the website. | `https://kebaikanku.id` |
+| `PUBLIC_SEO_IMAGE` | The path or absolute URL of the Open Graph sharing banner. | `/images/og-image.png` |
+| `PUBLIC_SEO_KEYWORDS` | Comma-separated list of keywords for metadata tags. | `donasi, zakat, open-source, crowdfunding, infak, sedekah` |
+| `PUBLIC_GA_TRACKING_ID` | Google Analytics (GA4) measurement ID (optional, e.g., `G-XXXXXXXXXX`). | `""` (disabled if blank) |
+| `PUBLIC_GTM_CONTAINER_ID` | Google Tag Manager Container ID (optional, e.g., `GTM-XXXXXXX`). | `""` (disabled if blank) |
+
+
 ## Backend Deployment
 
 Build:

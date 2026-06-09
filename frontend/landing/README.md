@@ -19,12 +19,23 @@ Implemented:
 
 ## Local Development
 
-```bash
-npm install
-npm run dev
-```
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Vite starts on `http://localhost:5173` by default.
+2. Copy the environment variables example:
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Start the local Vite server:
+   ```bash
+   npm run dev
+   ```
+
+Vite starts on `http://localhost:8383` (strictPort) by default.
+
 
 ## Static Build
 

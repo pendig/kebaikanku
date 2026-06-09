@@ -88,6 +88,8 @@ See [frontend/landing/README.md](frontend/landing/README.md) for local developme
 - [Localization strategy](docs/localization.md)
 - [Roadmap](docs/roadmap.md)
 - [Project handover](docs/handover.md)
+- [Developer onboarding & runbook](docs/onboarding.md)
+- [Landing page static deployment checklist](docs/deployment_checklist.md)
 
 ## Payment Gateway
 

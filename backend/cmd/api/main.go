@@ -50,7 +50,7 @@ func main() {
 
 	// CORS config
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:*", "https://*.pages.dev", "https://kebaikanku.id", "https://*.kebaikanku.id"},
+		AllowedOrigins:   []string{"http://localhost:*", "http://127.0.0.1:*", "https://*.pages.dev", "https://kebaikanku.id", "https://*.kebaikanku.id"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRID"},
 		ExposedHeaders:   []string{"Link"},

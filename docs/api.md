@@ -46,6 +46,49 @@ Error response shape:
 
 Returns server health and current server time.
 
+## Waitlist
+
+### `POST /api/v1/waitlist`
+
+Registers an email for the landing-page waitlist.
+When SMTP is configured, the API queues a confirmation email after the address is stored.
+When `WAITLIST_ADMIN_EMAIL` is configured, the API also queues an admin notification.
+
+Request:
+
+```json
+{
+  "email": "admin@example.org",
+  "website": "",
+  "source": "landing-coming-soon"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "8b2f9e9e-0e5a-4db6-b6a3-f6f8b4f6dd1e",
+    "email_queued": true,
+    "admin_email_queued": true
+  }
+}
+```
+
+Error examples:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "DUPLICATE_EMAIL",
+    "message": "Email is already registered in the waitlist."
+  }
+}
+```
+
 ## Auth
 
 ### `POST /api/v1/auth/register`

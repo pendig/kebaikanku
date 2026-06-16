@@ -60,6 +60,15 @@ go build -o bin/api ./cmd/api
 | `MIDTRANS_CLIENT_KEY` | empty | Midtrans client key for frontend Snap usage. |
 | `MIDTRANS_NOTIFICATION_TOKEN` | empty | Optional internal token if the callback route is additionally guarded. |
 | `JWT_SECRET` | empty | Required once auth is implemented. |
+| `SMTP_HOST` | empty | SMTP host for transactional email. If empty, waitlist email is skipped. |
+| `SMTP_PORT` | `587` | SMTP port. Local dev uses `1025` with Mailpit-compatible SMTP. |
+| `SMTP_USER` | empty | SMTP username. |
+| `SMTP_PASS` | empty | SMTP password. |
+| `SMTP_FROM` | empty | Sender email address. Required with `SMTP_HOST`. |
+| `SMTP_FROM_NAME` | `kebaikanku.id` | Sender display name. |
+| `SMTP_ENCRYPTION` | empty | Set to `null` for local SMTP servers that do not advertise AUTH/TLS. |
+| `WAITLIST_ADMIN_EMAIL` | empty | Optional admin recipient for new waitlist signup notifications. |
+| `WAITLIST_EMAIL_URL` | `https://kebaikanku.id/coming-soon` | Link included in waitlist confirmation emails. |
 
 ## Database Notes
 
@@ -70,6 +79,15 @@ Local SQLite example:
 ```env
 DB_DRIVER=sqlite
 DB_DSN=kebaikanku.db
+SMTP_HOST=100.65.30.81
+SMTP_PORT=1025
+SMTP_USER=any
+SMTP_PASS=any
+SMTP_FROM=testing@penadigital.id
+SMTP_ENCRYPTION=null
+SMTP_FROM_NAME=Penadigital Dev
+WAITLIST_ADMIN_EMAIL=admin@example.com
+WAITLIST_EMAIL_URL=http://127.0.0.1:4173/coming-soon
 ```
 
 Local PostgreSQL example:

@@ -7,10 +7,19 @@ import (
 )
 
 type Config struct {
-	Port     string
-	DBDriver string
-	DBDsn    string
-	Env      string
+	Port               string
+	DBDriver           string
+	DBDsn              string
+	Env                string
+	SMTPHost           string
+	SMTPPort           string
+	SMTPUser           string
+	SMTPPass           string
+	SMTPFrom           string
+	SMTPFromName       string
+	SMTPEncryption     string
+	WaitlistEmailURL   string
+	WaitlistAdminEmail string
 }
 
 func Load() *Config {
@@ -23,10 +32,19 @@ func Load() *Config {
 	env := getEnv("APP_ENV", "development")
 
 	return &Config{
-		Port:     port,
-		DBDriver: dbDriver,
-		DBDsn:    dbDsn,
-		Env:      env,
+		Port:               port,
+		DBDriver:           dbDriver,
+		DBDsn:              dbDsn,
+		Env:                env,
+		SMTPHost:           getEnv("SMTP_HOST", ""),
+		SMTPPort:           getEnv("SMTP_PORT", "587"),
+		SMTPUser:           getEnv("SMTP_USER", ""),
+		SMTPPass:           getEnv("SMTP_PASS", ""),
+		SMTPFrom:           getEnv("SMTP_FROM", ""),
+		SMTPFromName:       getEnv("SMTP_FROM_NAME", "kebaikanku.id"),
+		SMTPEncryption:     getEnv("SMTP_ENCRYPTION", ""),
+		WaitlistEmailURL:   getEnv("WAITLIST_EMAIL_URL", "https://kebaikanku.id/coming-soon"),
+		WaitlistAdminEmail: getEnv("WAITLIST_ADMIN_EMAIL", ""),
 	}
 }
 

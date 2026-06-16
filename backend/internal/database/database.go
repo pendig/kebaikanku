@@ -41,6 +41,7 @@ func Init(cfg *config.Config) *gorm.DB {
 		&domain.Campaign{},
 		&domain.Donor{},
 		&domain.Donation{},
+		&domain.Waitlist{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to run database migrations: %v", err)

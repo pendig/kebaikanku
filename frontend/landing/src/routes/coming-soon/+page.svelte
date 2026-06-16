@@ -1,7 +1,6 @@
 <script>
 	import { t } from '$lib/i18n';
 	import { env } from '$env/dynamic/public';
-	import { onMount } from 'svelte';
 
 	let email = $state('');
 	let emailError = $state('');
@@ -9,11 +8,6 @@
 	let isLoading = $state(false);
 	let totalSignups = $state(142);
 	let website = $state('');
-	let submittedAt = $state(0);
-
-	onMount(() => {
-		submittedAt = Date.now();
-	});
 
 	function validateEmail(val) {
 		const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,8 +42,8 @@
 				},
 				body: JSON.stringify({
 					email: payloadEmail,
-					submitted_at: Math.floor(submittedAt / 1000),
-					website
+					website,
+					source: 'landing-coming-soon'
 				})
 			});
 
@@ -66,7 +60,6 @@
 			emailError = 'Terjadi kesalahan jaringan. Coba lagi sebentar.';
 		} finally {
 			isLoading = false;
-			submittedAt = Date.now();
 		}
 	}
 </script>

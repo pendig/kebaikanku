@@ -25,6 +25,7 @@ import (
 
 const (
 	waitlistCooldown = 20 * time.Second
+	maxWaitlistBody  = 1 << 20
 )
 
 var (
@@ -81,10 +82,9 @@ func main() {
 }
 
 type waitlistPayload struct {
-	Email       string `json:"email"`
-	Website     string `json:"website"`
-	Source      string `json:"source"`
-	SubmittedAt int64  `json:"submitted_at"`
+	Email   string `json:"email"`
+	Website string `json:"website"`
+	Source  string `json:"source"`
 }
 
 type apiErrorResponse struct {
@@ -101,6 +101,7 @@ type apiResponse struct {
 func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
+	r.Body = http.MaxBytesReader(w, r.Body, maxWaitlistBody)
 
 	var req waitlistPayload
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -116,11 +117,6 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 
 	if strings.TrimSpace(req.Website) != "" {
 		writeWaitlistError(w, http.StatusBadRequest, "BOT_DETECTED", "Request rejected as suspicious.")
-		return
-	}
-
-	if req.SubmittedAt == 0 || time.Now().UTC().Sub(time.Unix(req.SubmittedAt, 0).UTC()) < 2*time.Second {
-		writeWaitlistError(w, http.StatusBadRequest, "BOT_DETECTED", "Form submission was too fast.")
 		return
 	}
 
@@ -149,30 +145,26 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.Header.Get("User-Agent"),
 	}
 	if err := database.DB.Create(&entry).Error; err != nil {
-		writeWaitlistError(w, http.StatusConflict, "DUPLICATE_EMAIL", "Email is already registered in the waitlist.")
+		if isDuplicateDBError(err) {
+			writeWaitlistError(w, http.StatusConflict, "DUPLICATE_EMAIL", "Email is already registered in the waitlist.")
+			return
+		}
+		writeWaitlistError(w, http.StatusInternalServerError, "DB_ERROR", "Could not process waitlist registration.")
 		return
 	}
 
-	emailSent := false
-	if err := sendWaitlistConfirmation(appConfig, email); err != nil {
-		fmt.Printf("Failed to send waitlist confirmation to %s: %v\n", email, err)
-	} else if isSMTPConfigured(appConfig) {
-		emailSent = true
-	}
-
-	adminEmailSent := false
-	if err := sendWaitlistAdminNotification(appConfig, entry); err != nil {
-		fmt.Printf("Failed to send waitlist admin notification for %s: %v\n", email, err)
-	} else if isAdminEmailConfigured(appConfig) {
-		adminEmailSent = true
+	emailQueued := isSMTPConfigured(appConfig)
+	adminEmailQueued := isAdminEmailConfigured(appConfig)
+	if emailQueued || adminEmailQueued {
+		go deliverWaitlistEmails(appConfig, entry)
 	}
 
 	response := apiResponse{
 		Success: true,
 		Data: map[string]any{
-			"id":               entry.ID,
-			"email_sent":       emailSent,
-			"admin_email_sent": adminEmailSent,
+			"id":                 entry.ID,
+			"email_queued":       emailQueued,
+			"admin_email_queued": adminEmailQueued,
 		},
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -196,6 +188,13 @@ func blockedByRateLimit(ip string) bool {
 	waitlistRequestGuard.Lock()
 	defer waitlistRequestGuard.Unlock()
 
+	cutoff := now.Add(-waitlistCooldown)
+	for key, timestamp := range waitlistRequestWindow {
+		if timestamp.Before(cutoff) {
+			delete(waitlistRequestWindow, key)
+		}
+	}
+
 	lastRequest, ok := waitlistRequestWindow[ip]
 	if ok && now.Sub(lastRequest) < waitlistCooldown {
 		return true
@@ -205,16 +204,31 @@ func blockedByRateLimit(ip string) bool {
 }
 
 func getClientIP(r *http.Request) string {
-	if xff := strings.TrimSpace(r.Header.Get("X-Forwarded-For")); xff != "" {
-		parts := strings.Split(xff, ",")
-		return strings.TrimSpace(parts[0])
-	}
-
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return strings.TrimSpace(r.RemoteAddr)
 	}
 	return host
+}
+
+func isDuplicateDBError(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "unique constraint") ||
+		strings.Contains(message, "duplicate key") ||
+		strings.Contains(message, "duplicated key") ||
+		strings.Contains(message, "1062")
+}
+
+func deliverWaitlistEmails(cfg *config.Config, entry domain.Waitlist) {
+	if err := sendWaitlistConfirmation(cfg, entry.Email); err != nil {
+		fmt.Printf("Failed to send waitlist confirmation: %v\n", err)
+	}
+	if err := sendWaitlistAdminNotification(cfg, entry); err != nil {
+		fmt.Printf("Failed to send waitlist admin notification: %v\n", err)
+	}
 }
 
 func sendWaitlistConfirmation(cfg *config.Config, recipient string) error {
@@ -321,5 +335,7 @@ func randomID() string {
 	if _, err := rand.Read(b[:]); err != nil {
 		return fmt.Sprintf("%x", time.Now().UnixNano())
 	}
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
 	return fmt.Sprintf("%s-%s-%s-%s-%s", hex.EncodeToString(b[0:4]), hex.EncodeToString(b[4:6]), hex.EncodeToString(b[6:8]), hex.EncodeToString(b[8:10]), hex.EncodeToString(b[10:16]))
 }

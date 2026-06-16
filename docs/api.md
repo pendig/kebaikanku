@@ -51,8 +51,8 @@ Returns server health and current server time.
 ### `POST /api/v1/waitlist`
 
 Registers an email for the landing-page waitlist.
-When SMTP is configured, the API sends a confirmation email after the address is stored.
-When `WAITLIST_ADMIN_EMAIL` is configured, the API also sends an admin notification.
+When SMTP is configured, the API queues a confirmation email after the address is stored.
+When `WAITLIST_ADMIN_EMAIL` is configured, the API also queues an admin notification.
 
 Request:
 
@@ -60,8 +60,7 @@ Request:
 {
   "email": "admin@example.org",
   "website": "",
-  "source": "landing-coming-soon",
-  "submitted_at": 1718200000
+  "source": "landing-coming-soon"
 }
 ```
 
@@ -72,8 +71,8 @@ Response:
   "success": true,
   "data": {
     "id": "8b2f9e9e-0e5a-4db6-b6a3-f6f8b4f6dd1e",
-    "email_sent": true,
-    "admin_email_sent": true
+    "email_queued": true,
+    "admin_email_queued": true
   }
 }
 ```

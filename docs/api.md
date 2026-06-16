@@ -46,6 +46,46 @@ Error response shape:
 
 Returns server health and current server time.
 
+## Waitlist
+
+### `POST /api/v1/waitlist`
+
+Registers an email for the landing-page waitlist.
+
+Request:
+
+```json
+{
+  "email": "admin@example.org",
+  "website": "",
+  "source": "landing-coming-soon",
+  "submitted_at": 1718200000
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "8b2f9e9e-0e5a-4db6-b6a3-f6f8b4f6dd1e"
+  }
+}
+```
+
+Error examples:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "DUPLICATE_EMAIL",
+    "message": "Email is already registered in the waitlist."
+  }
+}
+```
+
 ## Auth
 
 ### `POST /api/v1/auth/register`

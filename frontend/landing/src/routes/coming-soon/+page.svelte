@@ -1,18 +1,18 @@
 <script>
 	import { t } from '$lib/i18n';
+	import { env } from '$env/dynamic/public';
 	import { onMount } from 'svelte';
 
 	let email = $state('');
 	let emailError = $state('');
 	let isSubmitted = $state(false);
 	let isLoading = $state(false);
-	let totalSignups = $state(0);
+	let totalSignups = $state(142);
+	let website = $state('');
+	let submittedAt = $state(0);
 
 	onMount(() => {
-		// Calculate current signups count (simulated)
-		const saved = localStorage.getItem('kbk_waitlist_emails');
-		const emailList = saved ? JSON.parse(saved) : [];
-		totalSignups = 142 + emailList.length; // Base mock number + actual local entries
+		submittedAt = Date.now();
 	});
 
 	function validateEmail(val) {
@@ -20,42 +20,54 @@
 		return re.test(String(val).toLowerCase());
 	}
 
-	function handleSubmit(e) {
+	async function handleSubmit(e) {
 		e.preventDefault();
 		emailError = '';
+		const payloadEmail = email.trim().toLowerCase();
+		if (website) {
+			emailError = 'Deteksi otomatisasi. Silakan ulangi secara manual.';
+			return;
+		}
 
-		if (!email) {
+		if (!payloadEmail) {
 			emailError = 'Email wajib diisi / Email is required';
 			return;
 		}
 
-		if (!validateEmail(email)) {
+		if (!validateEmail(payloadEmail)) {
 			emailError = 'Format email tidak valid / Invalid email format';
 			return;
 		}
 
 		isLoading = true;
-
-		// Simulated premium transition loading (1.2s delay)
-		setTimeout(() => {
-			isLoading = false;
-			isSubmitted = true;
-			
-			// Save locally
-			const saved = localStorage.getItem('kbk_waitlist_emails');
-			const emailList = saved ? JSON.parse(saved) : [];
-			if (!emailList.includes(email)) {
-				emailList.push(email);
-				localStorage.setItem('kbk_waitlist_emails', JSON.stringify(emailList));
-				totalSignups += 1;
-			}
-			
-			// Mock Analytics tracking
-			console.log('Waitlist Signup Event Triggered:', {
-				email: email,
-				timestamp: new Date().toISOString()
+		try {
+			const res = await fetch(env.PUBLIC_WAITLIST_API_URL || '/api/v1/waitlist', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					email: payloadEmail,
+					submitted_at: Math.floor(submittedAt / 1000),
+					website
+				})
 			});
-		}, 1200);
+
+			const data = await res.json().catch(() => ({ success: false }));
+
+			if (!res.ok || data.success === false) {
+				emailError = data?.error?.message || 'Gagal mendaftar. Coba lagi nanti.';
+				return;
+			}
+
+			isSubmitted = true;
+			totalSignups += 1;
+		} catch {
+			emailError = 'Terjadi kesalahan jaringan. Coba lagi sebentar.';
+		} finally {
+			isLoading = false;
+			submittedAt = Date.now();
+		}
 	}
 </script>
 
@@ -127,6 +139,17 @@
 								{#if emailError}
 									<p class="text-red-550 dark:text-red-400 text-xs mt-1.5 pl-1">{emailError}</p>
 								{/if}
+							</div>
+
+							<div class="hidden" aria-hidden="true">
+								<input
+									type="text"
+									name="website"
+									tabindex="-1"
+									autocomplete="off"
+									placeholder="Your website"
+									bind:value={website}
+								/>
 							</div>
 							
 							<button

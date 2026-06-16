@@ -5,8 +5,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"net"
+	"net/http"
+	"net/mail"
+	"net/smtp"
 	"regexp"
 	"strings"
 	"sync"
@@ -29,11 +31,13 @@ var (
 	waitlistRequestWindow = map[string]time.Time{}
 	waitlistRequestGuard  sync.Mutex
 	waitlistEmailRegex    = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+	appConfig             *config.Config
 )
 
 func main() {
 	// 1. Load Configurations
 	cfg := config.Load()
+	appConfig = cfg
 
 	// 2. Initialize Database and Auto-migrate
 	database.Init(cfg)
@@ -89,8 +93,8 @@ type apiErrorResponse struct {
 }
 
 type apiResponse struct {
-	Success bool             `json:"success"`
-	Data    map[string]any   `json:"data,omitempty"`
+	Success bool              `json:"success"`
+	Data    map[string]any    `json:"data,omitempty"`
 	Error   *apiErrorResponse `json:"error,omitempty"`
 }
 
@@ -149,10 +153,18 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	emailSent := false
+	if err := sendWaitlistConfirmation(appConfig, email); err != nil {
+		fmt.Printf("Failed to send waitlist confirmation to %s: %v\n", email, err)
+	} else if isSMTPConfigured(appConfig) {
+		emailSent = true
+	}
+
 	response := apiResponse{
 		Success: true,
 		Data: map[string]any{
-			"id": entry.ID,
+			"id":         entry.ID,
+			"email_sent": emailSent,
 		},
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -195,6 +207,58 @@ func getClientIP(r *http.Request) string {
 		return strings.TrimSpace(r.RemoteAddr)
 	}
 	return host
+}
+
+func sendWaitlistConfirmation(cfg *config.Config, recipient string) error {
+	if !isSMTPConfigured(cfg) {
+		return nil
+	}
+
+	from := mail.Address{Name: cfg.SMTPFromName, Address: cfg.SMTPFrom}
+	to := mail.Address{Address: recipient}
+	subject := "Anda sudah masuk waitlist kebaikanku.id"
+	body := fmt.Sprintf(`Halo,
+
+Terima kasih sudah bergabung ke waitlist kebaikanku.id.
+
+Kami akan mengirimkan update saat dashboard pengelola kampanye dan integrasi payment gateway sudah siap dirilis.
+
+Pantau halaman ini untuk update berikutnya:
+%s
+
+Salam,
+Tim kebaikanku.id
+`, cfg.WaitlistEmailURL)
+
+	headers := map[string]string{
+		"From":         from.String(),
+		"To":           to.String(),
+		"Subject":      subject,
+		"MIME-Version": "1.0",
+		"Content-Type": "text/plain; charset=UTF-8",
+	}
+
+	var message strings.Builder
+	for key, value := range headers {
+		message.WriteString(key)
+		message.WriteString(": ")
+		message.WriteString(value)
+		message.WriteString("\r\n")
+	}
+	message.WriteString("\r\n")
+	message.WriteString(body)
+
+	addr := net.JoinHostPort(cfg.SMTPHost, cfg.SMTPPort)
+	var auth smtp.Auth
+	if cfg.SMTPUser != "" && cfg.SMTPPass != "" && strings.ToLower(cfg.SMTPEncryption) != "null" {
+		auth = smtp.PlainAuth("", cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPHost)
+	}
+
+	return smtp.SendMail(addr, auth, cfg.SMTPFrom, []string{recipient}, []byte(message.String()))
+}
+
+func isSMTPConfigured(cfg *config.Config) bool {
+	return cfg != nil && cfg.SMTPHost != "" && cfg.SMTPPort != "" && cfg.SMTPFrom != ""
 }
 
 func randomID() string {

@@ -51,6 +51,7 @@ Returns server health and current server time.
 ### `POST /api/v1/waitlist`
 
 Registers an email for the landing-page waitlist.
+When SMTP is configured, the API sends a confirmation email after the address is stored.
 
 Request:
 
@@ -69,7 +70,8 @@ Response:
 {
   "success": true,
   "data": {
-    "id": "8b2f9e9e-0e5a-4db6-b6a3-f6f8b4f6dd1e"
+    "id": "8b2f9e9e-0e5a-4db6-b6a3-f6f8b4f6dd1e",
+    "email_sent": true
   }
 }
 ```

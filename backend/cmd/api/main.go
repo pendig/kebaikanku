@@ -160,11 +160,19 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 		emailSent = true
 	}
 
+	adminEmailSent := false
+	if err := sendWaitlistAdminNotification(appConfig, entry); err != nil {
+		fmt.Printf("Failed to send waitlist admin notification for %s: %v\n", email, err)
+	} else if isAdminEmailConfigured(appConfig) {
+		adminEmailSent = true
+	}
+
 	response := apiResponse{
 		Success: true,
 		Data: map[string]any{
-			"id":         entry.ID,
-			"email_sent": emailSent,
+			"id":               entry.ID,
+			"email_sent":       emailSent,
+			"admin_email_sent": adminEmailSent,
 		},
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -248,17 +256,64 @@ Tim kebaikanku.id
 	message.WriteString("\r\n")
 	message.WriteString(body)
 
+	return sendSMTPMessage(cfg, recipient, message.String())
+}
+
+func sendWaitlistAdminNotification(cfg *config.Config, entry domain.Waitlist) error {
+	if !isAdminEmailConfigured(cfg) {
+		return nil
+	}
+
+	from := mail.Address{Name: cfg.SMTPFromName, Address: cfg.SMTPFrom}
+	to := mail.Address{Address: cfg.WaitlistAdminEmail}
+	subject := "Waitlist baru kebaikanku.id"
+	body := fmt.Sprintf(`Ada pendaftar baru di waitlist kebaikanku.id.
+
+Email: %s
+Source: %s
+IP Address: %s
+User Agent: %s
+Created At: %s
+ID: %s
+`, entry.Email, entry.Source, entry.IPAddress, entry.UserAgent, entry.CreatedAt.Format(time.RFC3339), entry.ID)
+
+	headers := map[string]string{
+		"From":         from.String(),
+		"To":           to.String(),
+		"Subject":      subject,
+		"MIME-Version": "1.0",
+		"Content-Type": "text/plain; charset=UTF-8",
+	}
+
+	var message strings.Builder
+	for key, value := range headers {
+		message.WriteString(key)
+		message.WriteString(": ")
+		message.WriteString(value)
+		message.WriteString("\r\n")
+	}
+	message.WriteString("\r\n")
+	message.WriteString(body)
+
+	return sendSMTPMessage(cfg, cfg.WaitlistAdminEmail, message.String())
+}
+
+func isSMTPConfigured(cfg *config.Config) bool {
+	return cfg != nil && cfg.SMTPHost != "" && cfg.SMTPPort != "" && cfg.SMTPFrom != ""
+}
+
+func isAdminEmailConfigured(cfg *config.Config) bool {
+	return isSMTPConfigured(cfg) && cfg.WaitlistAdminEmail != ""
+}
+
+func sendSMTPMessage(cfg *config.Config, recipient string, message string) error {
 	addr := net.JoinHostPort(cfg.SMTPHost, cfg.SMTPPort)
 	var auth smtp.Auth
 	if cfg.SMTPUser != "" && cfg.SMTPPass != "" && strings.ToLower(cfg.SMTPEncryption) != "null" {
 		auth = smtp.PlainAuth("", cfg.SMTPUser, cfg.SMTPPass, cfg.SMTPHost)
 	}
 
-	return smtp.SendMail(addr, auth, cfg.SMTPFrom, []string{recipient}, []byte(message.String()))
-}
-
-func isSMTPConfigured(cfg *config.Config) bool {
-	return cfg != nil && cfg.SMTPHost != "" && cfg.SMTPPort != "" && cfg.SMTPFrom != ""
+	return smtp.SendMail(addr, auth, cfg.SMTPFrom, []string{recipient}, []byte(message))
 }
 
 func randomID() string {

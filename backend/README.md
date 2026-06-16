@@ -68,6 +68,7 @@ go build -o bin/api ./cmd/api
 | `SMTP_FROM_NAME` | `kebaikanku.id` | Sender display name. |
 | `SMTP_ENCRYPTION` | empty | Set to `null` for local SMTP servers that do not advertise AUTH/TLS. |
 | `WAITLIST_EMAIL_URL` | `https://kebaikanku.id/coming-soon` | Link included in waitlist confirmation emails. |
+| `WAITLIST_ADMIN_EMAIL` | empty | Optional admin recipient for new waitlist signup notifications. |
 
 ## Database Notes
 
@@ -86,6 +87,7 @@ SMTP_FROM=testing@penadigital.id
 SMTP_ENCRYPTION=null
 SMTP_FROM_NAME=Penadigital Dev
 WAITLIST_EMAIL_URL=http://127.0.0.1:4173/coming-soon
+WAITLIST_ADMIN_EMAIL=admin@example.com
 ```
 
 Local PostgreSQL example:

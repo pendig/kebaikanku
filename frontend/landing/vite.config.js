@@ -4,6 +4,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+	envPrefix: ['VITE_', 'PUBLIC_'],
 	server: {
 		port: 8383,
 		strictPort: true
@@ -15,7 +16,7 @@ export default defineConfig({
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 				runes: ({ filename }) => filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter(),
+			adapter: adapter({ fallback: '404.html' }),
 			prerender: {
 				handleHttpError: 'warn'
 			}

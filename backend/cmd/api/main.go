@@ -84,6 +84,7 @@ func main() {
 	r.Get("/api/v1/campaigns", handleListCampaigns)
 	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 	r.Post("/api/v1/campaigns", handleCreateCampaign)
+	r.Put("/api/v1/campaigns/{id}", handleUpdateCampaign)
 	r.Post("/api/v1/donations", handleCreateDonation)
 	r.Get("/api/v1/donations/export", handleExportDonations)
 	r.Post("/api/v1/payments/midtrans/notification", handleMidtransNotification)
@@ -171,15 +172,20 @@ func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
 	}
 
 	campaign := domain.Campaign{
-		ID:             randomID(),
-		OrganizationID: strings.TrimSpace(req.OrganizationID),
-		Title:          strings.TrimSpace(req.Title),
-		Slug:           strings.TrimSpace(req.Slug),
-		Description:    strings.TrimSpace(req.Description),
-		Category:       strings.TrimSpace(req.Category),
-		TargetAmount:   req.TargetAmount,
-		EndDate:        endDate,
-		Status:         "active",
+		ID:              randomID(),
+		OrganizationID:  strings.TrimSpace(req.OrganizationID),
+		Title:           strings.TrimSpace(req.Title),
+		Slug:            strings.TrimSpace(req.Slug),
+		Description:     strings.TrimSpace(req.Description),
+		Category:        strings.TrimSpace(req.Category),
+		Subcategory:     strings.TrimSpace(req.Subcategory),
+		CampaignType:    defaultString(strings.TrimSpace(req.CampaignType), "target_deadline"),
+		BannerURL:       strings.TrimSpace(req.BannerURL),
+		Location:        strings.TrimSpace(req.Location),
+		BeneficiaryNote: strings.TrimSpace(req.BeneficiaryNote),
+		TargetAmount:    req.TargetAmount,
+		EndDate:         endDate,
+		Status:          "active",
 	}
 	if campaign.OrganizationID == "" || campaign.Title == "" || campaign.Slug == "" || campaign.Category == "" || campaign.TargetAmount <= 0 {
 		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "organization_id, title, slug, category, and positive target_amount are required.")
@@ -208,6 +214,57 @@ func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleUpdateCampaign(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	if !hasAdminToken(r) {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid campaign admin token is required.")
+		return
+	}
+
+	var req campaignPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	endDate, err := time.Parse(time.RFC3339, strings.TrimSpace(req.EndDate))
+	if err != nil {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "end_date must use RFC3339 format.")
+		return
+	}
+
+	campaign := domain.Campaign{
+		ID:              strings.TrimSpace(chi.URLParam(r, "id")),
+		Title:           strings.TrimSpace(req.Title),
+		Slug:            strings.TrimSpace(req.Slug),
+		Description:     strings.TrimSpace(req.Description),
+		Category:        strings.TrimSpace(req.Category),
+		Subcategory:     strings.TrimSpace(req.Subcategory),
+		CampaignType:    defaultString(strings.TrimSpace(req.CampaignType), "target_deadline"),
+		BannerURL:       strings.TrimSpace(req.BannerURL),
+		Location:        strings.TrimSpace(req.Location),
+		BeneficiaryNote: strings.TrimSpace(req.BeneficiaryNote),
+		TargetAmount:    req.TargetAmount,
+		EndDate:         endDate,
+	}
+	if campaign.ID == "" || campaign.Title == "" || campaign.Slug == "" || campaign.Category == "" || campaign.TargetAmount <= 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "id, title, slug, category, and positive target_amount are required.")
+		return
+	}
+	if !campaignSlugRegex.MatchString(campaign.Slug) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "slug must only contain lowercase alphanumeric characters and hyphens.")
+		return
+	}
+	if err := appStore.UpdateCampaign(&campaign); err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not update campaign.")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{Success: true})
+}
+
 func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	w.Header().Set("Content-Type", "application/json")
@@ -234,8 +291,15 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 		PhoneNumber: strings.TrimSpace(req.Donor.PhoneNumber),
 		Email:       strings.TrimSpace(req.Donor.Email),
 	}
-	if donor.Name == "" || donor.PhoneNumber == "" || req.Amount <= 0 || req.PlatformTip < 0 {
-		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor name, donor phone, positive amount, and non-negative platform_tip are required.")
+	if req.Anonymous && donor.Name == "" {
+		donor.Name = "Hamba Allah"
+	}
+	if donor.PhoneNumber == "" {
+		// ponytail: phone is optional for alpha; synthetic value keeps the existing unique donor constraint.
+		donor.PhoneNumber = "guest-" + randomID()
+	}
+	if donor.Name == "" || req.Amount <= 0 || req.PlatformTip < 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor name or anonymous, positive amount, and non-negative platform_tip are required.")
 		return
 	}
 	if donor.Email != "" && !waitlistEmailRegex.MatchString(donor.Email) {
@@ -459,13 +523,18 @@ type waitlistPayload struct {
 }
 
 type campaignPayload struct {
-	OrganizationID string  `json:"organization_id"`
-	Title          string  `json:"title"`
-	Slug           string  `json:"slug"`
-	Description    string  `json:"description"`
-	Category       string  `json:"category"`
-	TargetAmount   float64 `json:"target_amount"`
-	EndDate        string  `json:"end_date"`
+	OrganizationID  string  `json:"organization_id"`
+	Title           string  `json:"title"`
+	Slug            string  `json:"slug"`
+	Description     string  `json:"description"`
+	Category        string  `json:"category"`
+	Subcategory     string  `json:"subcategory"`
+	CampaignType    string  `json:"campaign_type"`
+	BannerURL       string  `json:"banner_url"`
+	Location        string  `json:"location"`
+	BeneficiaryNote string  `json:"beneficiary_note"`
+	TargetAmount    float64 `json:"target_amount"`
+	EndDate         string  `json:"end_date"`
 }
 
 type donorPayload struct {
@@ -477,6 +546,7 @@ type donorPayload struct {
 type donationPayload struct {
 	CampaignID    string       `json:"campaign_id"`
 	Donor         donorPayload `json:"donor"`
+	Anonymous     bool         `json:"anonymous"`
 	Amount        float64      `json:"amount"`
 	PlatformTip   float64      `json:"platform_tip"`
 	PaymentMethod string       `json:"payment_method"`

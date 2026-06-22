@@ -50,6 +50,22 @@ func (s *Store) CreateCampaign(campaign *domain.Campaign) error {
 	return s.db.Create(campaign).Error
 }
 
+func (s *Store) UpdateCampaign(campaign *domain.Campaign) error {
+	return s.db.Model(&domain.Campaign{}).Where("id = ?", campaign.ID).Updates(map[string]any{
+		"title":            campaign.Title,
+		"slug":             campaign.Slug,
+		"description":      campaign.Description,
+		"category":         campaign.Category,
+		"subcategory":      campaign.Subcategory,
+		"campaign_type":    campaign.CampaignType,
+		"banner_url":       campaign.BannerURL,
+		"location":         campaign.Location,
+		"beneficiary_note": campaign.BeneficiaryNote,
+		"target_amount":    campaign.TargetAmount,
+		"end_date":         campaign.EndDate,
+	}).Error
+}
+
 func (s *Store) FindOrCreateDonor(donor *domain.Donor) (*domain.Donor, error) {
 	if err := s.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "phone_number"}},

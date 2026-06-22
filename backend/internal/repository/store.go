@@ -35,6 +35,15 @@ func (s *Store) GetActiveCampaignBySlug(slug string) (*domain.Campaign, error) {
 	return &campaign, err
 }
 
+func (s *Store) GetActiveCampaignByID(id string) (*domain.Campaign, error) {
+	var campaign domain.Campaign
+	err := s.db.Where("id = ? AND status = ?", id, "active").First(&campaign).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &campaign, err
+}
+
 func (s *Store) CreateCampaign(campaign *domain.Campaign) error {
 	return s.db.Create(campaign).Error
 }
@@ -53,6 +62,14 @@ func (s *Store) FindOrCreateDonor(donor *domain.Donor) (*domain.Donor, error) {
 
 func (s *Store) CreateDonation(donation *domain.Donation) error {
 	return s.db.Create(donation).Error
+}
+
+func (s *Store) UpdateDonationProvider(donationID, providerOrderID, providerStatus string) error {
+	return s.db.Model(&domain.Donation{}).Where("id = ?", donationID).Updates(map[string]any{
+		"provider":          "midtrans",
+		"provider_order_id": providerOrderID,
+		"provider_status":   providerStatus,
+	}).Error
 }
 
 func (s *Store) GetDonation(id string) (*domain.Donation, error) {

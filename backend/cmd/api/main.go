@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net"
 	"net/http"
 	"net/mail"
@@ -22,6 +23,7 @@ import (
 	"github.com/kebaikankuid/kebaikanku/backend/internal/config"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/database"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
+	"github.com/kebaikankuid/kebaikanku/backend/internal/payment"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/repository"
 	"gorm.io/gorm"
 )
@@ -37,6 +39,7 @@ var (
 	waitlistEmailRegex    = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	appConfig             *config.Config
 	appStore              *repository.Store
+	appPayment            *payment.MidtransClient
 )
 
 func main() {
@@ -47,6 +50,7 @@ func main() {
 	// 2. Initialize Database and Auto-migrate
 	database.Init(cfg)
 	appStore = repository.NewStore(database.DB)
+	appPayment = payment.NewMidtransClient(cfg.MidtransEnv, cfg.MidtransServerKey)
 
 	// 3. Setup Router
 	r := chi.NewRouter()
@@ -78,6 +82,7 @@ func main() {
 	r.Get("/api/v1/campaigns", handleListCampaigns)
 	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 	r.Post("/api/v1/campaigns", handleCreateCampaign)
+	r.Post("/api/v1/donations", handleCreateDonation)
 
 	// 5. Start Server
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
@@ -195,6 +200,88 @@ func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	var req donationPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	campaign, err := appStore.GetActiveCampaignByID(strings.TrimSpace(req.CampaignID))
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaign.")
+		return
+	}
+	if campaign == nil {
+		writeAPIError(w, http.StatusNotFound, "CAMPAIGN_NOT_FOUND", "Campaign was not found.")
+		return
+	}
+
+	donor := domain.Donor{
+		ID:          randomID(),
+		Name:        strings.TrimSpace(req.Donor.Name),
+		PhoneNumber: strings.TrimSpace(req.Donor.PhoneNumber),
+		Email:       strings.TrimSpace(req.Donor.Email),
+	}
+	if donor.Name == "" || donor.PhoneNumber == "" || req.Amount <= 0 || req.PlatformTip < 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor name, donor phone, positive amount, and non-negative platform_tip are required.")
+		return
+	}
+
+	donorRecord, err := appStore.FindOrCreateDonor(&donor)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not save donor.")
+		return
+	}
+
+	donation := domain.Donation{
+		ID:             randomID(),
+		CampaignID:     campaign.ID,
+		DonorID:        donorRecord.ID,
+		Amount:         req.Amount,
+		PlatformTip:    req.PlatformTip,
+		Status:         "pending",
+		PaymentMethod:  defaultString(strings.TrimSpace(req.PaymentMethod), "midtrans_snap"),
+		Provider:       "midtrans",
+		ProviderStatus: "pending",
+	}
+	donation.ProviderOrderID = donation.ID
+	if err := appStore.CreateDonation(&donation); err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not create donation.")
+		return
+	}
+
+	snap, err := appPayment.CreateSnapTransaction(r.Context(), payment.SnapRequest{
+		OrderID:     donation.ProviderOrderID,
+		GrossAmount: int64(math.Round(req.Amount + req.PlatformTip)),
+		DonorName:   donorRecord.Name,
+		DonorEmail:  donorRecord.Email,
+		DonorPhone:  donorRecord.PhoneNumber,
+		ItemName:    campaign.Title,
+	})
+	if err != nil {
+		writeAPIError(w, http.StatusBadGateway, "PAYMENT_PROVIDER_ERROR", "Could not start Midtrans payment.")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"donation_id": donation.ID,
+			"status":      donation.Status,
+			"payment": map[string]any{
+				"provider":     "midtrans",
+				"snap_token":   snap.Token,
+				"redirect_url": snap.RedirectURL,
+			},
+		},
+	})
+}
+
 func queryInt(r *http.Request, key string, fallback int) int {
 	value := strings.TrimSpace(r.URL.Query().Get(key))
 	if value == "" {
@@ -205,6 +292,13 @@ func queryInt(r *http.Request, key string, fallback int) int {
 		return fallback
 	}
 	return parsed
+}
+
+func defaultString(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
 }
 
 func hasAdminToken(r *http.Request) bool {
@@ -229,6 +323,20 @@ type campaignPayload struct {
 	Category       string  `json:"category"`
 	TargetAmount   float64 `json:"target_amount"`
 	EndDate        string  `json:"end_date"`
+}
+
+type donorPayload struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+}
+
+type donationPayload struct {
+	CampaignID    string       `json:"campaign_id"`
+	Donor         donorPayload `json:"donor"`
+	Amount        float64      `json:"amount"`
+	PlatformTip   float64      `json:"platform_tip"`
+	PaymentMethod string       `json:"payment_method"`
 }
 
 type apiErrorResponse struct {

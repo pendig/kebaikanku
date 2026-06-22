@@ -10,6 +10,7 @@ import (
 	"net/mail"
 	"net/smtp"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,6 +21,7 @@ import (
 	"github.com/kebaikankuid/kebaikanku/backend/internal/config"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/database"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
+	"github.com/kebaikankuid/kebaikanku/backend/internal/repository"
 	"gorm.io/gorm"
 )
 
@@ -33,6 +35,7 @@ var (
 	waitlistRequestGuard  sync.Mutex
 	waitlistEmailRegex    = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
 	appConfig             *config.Config
+	appStore              *repository.Store
 )
 
 func main() {
@@ -42,6 +45,7 @@ func main() {
 
 	// 2. Initialize Database and Auto-migrate
 	database.Init(cfg)
+	appStore = repository.NewStore(database.DB)
 
 	// 3. Setup Router
 	r := chi.NewRouter()
@@ -70,6 +74,8 @@ func main() {
 		_, _ = w.Write([]byte(`{"status":"healthy","time":"` + time.Now().Format(time.RFC3339) + `"}`))
 	})
 	r.Post("/api/v1/waitlist", handleWaitlistSignup)
+	r.Get("/api/v1/campaigns", handleListCampaigns)
+	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 
 	// 5. Start Server
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
@@ -79,6 +85,69 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to start server: %v", err))
 	}
+}
+
+func handleListCampaigns(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	limit := queryInt(r, "limit", 20)
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	page := queryInt(r, "page", 1)
+	if page < 1 {
+		page = 1
+	}
+
+	campaigns, err := appStore.ListActiveCampaigns(strings.TrimSpace(r.URL.Query().Get("category")), limit, (page-1)*limit)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaigns.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaigns": campaigns,
+			"page":      page,
+			"limit":     limit,
+		},
+	})
+}
+
+func handleGetCampaign(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	campaign, err := appStore.GetActiveCampaignBySlug(strings.TrimSpace(chi.URLParam(r, "slug")))
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaign.")
+		return
+	}
+	if campaign == nil {
+		writeAPIError(w, http.StatusNotFound, "CAMPAIGN_NOT_FOUND", "Campaign was not found.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaign": campaign,
+		},
+	})
+}
+
+func queryInt(r *http.Request, key string, fallback int) int {
+	value := strings.TrimSpace(r.URL.Query().Get(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return fallback
+	}
+	return parsed
 }
 
 type waitlistPayload struct {
@@ -172,6 +241,10 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeWaitlistError(w http.ResponseWriter, status int, code, message string) {
+	writeAPIError(w, status, code, message)
+}
+
+func writeAPIError(w http.ResponseWriter, status int, code, message string) {
 	w.WriteHeader(status)
 	response := apiResponse{
 		Success: false,

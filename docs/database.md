@@ -135,7 +135,7 @@ type Donation struct {
 
 ## 🔄 Schema Migrations
 
-We leverage GORM's `AutoMigrate` command at application startup to handle schema adjustments automatically.
+We currently use GORM's `AutoMigrate` command at application startup, then record the applied schema baseline in `schema_migrations`.
 
 ```go
 func RunMigrations() {
@@ -154,3 +154,11 @@ func RunMigrations() {
 
 > [!WARNING]
 > While `AutoMigrate` is excellent for development (SQLite), for production (PostgreSQL) we advise turning off AutoMigrate in production code and using schema tools like `golang-migrate` or GORM-native migrations manually to prevent unintended data operations.
+
+Current tracked schema version:
+
+```text
+20260622_alpha_mvp
+```
+
+This is the alpha baseline. Future schema changes should add a new version record and rollback note before release.

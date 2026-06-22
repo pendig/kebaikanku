@@ -19,11 +19,12 @@ Completed:
 - Go REST API skeleton with config loading, SQLite/PostgreSQL database selection, GORM auto-migration, middlewares, and `GET /health`.
 - Core domain models: `Organization`, `Campaign`, `Donor`, and `Donation`.
 - Static SvelteKit landing page with Indonesian/English localization, homepage, terms, and privacy pages.
+- Alpha SvelteKit dashboard for token-gated campaign setup and donation reconciliation.
 - Architecture, database, localization, and handover documentation.
 
 Not implemented yet:
-- Institution dashboard app.
-- Auth, campaign, donation, payment callback, and report APIs.
+- Full institution signup/login and JWT auth.
+- Report APIs.
 - Midtrans integration code.
 - CI/CD workflows and production deployment automation.
 
@@ -41,7 +42,8 @@ kebaikanku.id/
 ├── backend/                 # Go REST API service
 ├── docs/                    # Architecture, API, deployment, security, roadmap docs
 ├── frontend/
-│   └── landing/             # SvelteKit static landing page
+│   ├── landing/             # SvelteKit static landing page
+│   └── dashboard/           # SvelteKit alpha operator dashboard
 ├── CONTRIBUTING.md
 ├── LICENSE
 └── README.md

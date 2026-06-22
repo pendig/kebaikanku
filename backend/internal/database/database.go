@@ -3,12 +3,14 @@ package database
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/kebaikankuid/kebaikanku/backend/internal/config"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
 )
 
@@ -37,6 +39,7 @@ func Init(cfg *config.Config) *gorm.DB {
 
 	// Run auto migrations
 	err = DB.AutoMigrate(
+		&domain.SchemaMigration{},
 		&domain.Organization{},
 		&domain.Campaign{},
 		&domain.Donor{},
@@ -48,5 +51,20 @@ func Init(cfg *config.Config) *gorm.DB {
 	}
 	fmt.Println("Database schema migrated successfully.")
 
+	recordSchemaVersion(DB, "20260622_alpha_mvp")
+
 	return DB
+}
+
+func recordSchemaVersion(db *gorm.DB, version string) {
+	migration := domain.SchemaMigration{
+		Version:   version,
+		AppliedAt: time.Now().UTC(),
+	}
+	if err := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "version"}},
+		DoNothing: true,
+	}).Create(&migration).Error; err != nil {
+		log.Fatalf("Failed to record schema migration %s: %v", version, err)
+	}
 }

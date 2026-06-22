@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/rand"
 	"crypto/subtle"
+	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -83,6 +84,7 @@ func main() {
 	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 	r.Post("/api/v1/campaigns", handleCreateCampaign)
 	r.Post("/api/v1/donations", handleCreateDonation)
+	r.Get("/api/v1/donations/export", handleExportDonations)
 	r.Post("/api/v1/payments/midtrans/notification", handleMidtransNotification)
 
 	// 5. Start Server
@@ -325,6 +327,53 @@ func handleMidtransNotification(w http.ResponseWriter, r *http.Request) {
 			"counted": counted,
 		},
 	})
+}
+
+func handleExportDonations(w http.ResponseWriter, r *http.Request) {
+	if !hasAdminToken(r) {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid campaign admin token is required.")
+		return
+	}
+
+	donations, err := appStore.ListDonations(queryInt(r, "limit", 1000))
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not export donations.")
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", `attachment; filename="donations.csv"`)
+	writer := csv.NewWriter(w)
+	_ = writer.Write([]string{"id", "campaign", "donor_name", "donor_phone", "amount", "platform_tip", "status", "provider_status", "created_at", "paid_at"})
+	for _, donation := range donations {
+		campaignTitle := ""
+		if donation.Campaign != nil {
+			campaignTitle = donation.Campaign.Title
+		}
+		donorName := ""
+		donorPhone := ""
+		if donation.Donor != nil {
+			donorName = donation.Donor.Name
+			donorPhone = donation.Donor.PhoneNumber
+		}
+		paidAt := ""
+		if donation.PaidAt != nil {
+			paidAt = donation.PaidAt.Format(time.RFC3339)
+		}
+		_ = writer.Write([]string{
+			donation.ID,
+			campaignTitle,
+			donorName,
+			donorPhone,
+			fmt.Sprintf("%.0f", donation.Amount),
+			fmt.Sprintf("%.0f", donation.PlatformTip),
+			donation.Status,
+			donation.ProviderStatus,
+			donation.CreatedAt.Format(time.RFC3339),
+			paidAt,
+		})
+	}
+	writer.Flush()
 }
 
 func queryInt(r *http.Request, key string, fallback int) int {

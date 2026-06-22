@@ -116,3 +116,9 @@ func (s *Store) GetDonation(id string) (*domain.Donation, error) {
 	}
 	return &donation, err
 }
+
+func (s *Store) ListDonations(limit int) ([]domain.Donation, error) {
+	var donations []domain.Donation
+	err := s.db.Preload("Campaign").Preload("Donor").Order("created_at desc").Limit(limit).Find(&donations).Error
+	return donations, err
+}

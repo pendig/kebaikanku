@@ -246,6 +246,11 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "amount and platform_tip must be whole numbers.")
 		return
 	}
+	grossAmount := int64(req.Amount + req.PlatformTip)
+	if grossAmount < 1 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "amount + platform_tip must be at least 1.")
+		return
+	}
 
 	donorRecord, err := appStore.FindOrCreateDonor(&donor)
 	if err != nil {
@@ -272,13 +277,15 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 
 	snap, err := appPayment.CreateSnapTransaction(r.Context(), payment.SnapRequest{
 		OrderID:     donation.ProviderOrderID,
-		GrossAmount: int64(math.Round(req.Amount + req.PlatformTip)),
+		GrossAmount: grossAmount,
 		DonorName:   donorRecord.Name,
 		DonorEmail:  donorRecord.Email,
 		DonorPhone:  donorRecord.PhoneNumber,
 		ItemName:    campaign.Title,
 	})
 	if err != nil {
+		errPayload, _ := json.Marshal(map[string]any{"snap_init_error": err.Error()})
+		_, _ = appStore.ApplyPaymentStatus(donation.ProviderOrderID, "snap_init_failed", "", string(errPayload), "failed", nil)
 		writeAPIError(w, http.StatusBadGateway, "PAYMENT_PROVIDER_ERROR", "Could not start Midtrans payment.")
 		return
 	}
@@ -577,6 +584,7 @@ func writeWaitlistError(w http.ResponseWriter, status int, code, message string)
 }
 
 func writeAPIError(w http.ResponseWriter, status int, code, message string) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	response := apiResponse{
 		Success: false,

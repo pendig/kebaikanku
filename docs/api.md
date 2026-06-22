@@ -213,19 +213,13 @@ Returns donation reconciliation data as CSV. Requires `Authorization: Bearer <CA
 
 Response:
 
-```json
-{
-  "success": true,
-  "data": {
-    "donation_id": "uuid",
-    "status": "pending",
-    "payment": {
-      "provider": "midtrans",
-      "snap_token": "snap-token",
-      "redirect_url": "https://app.sandbox.midtrans.com/snap/v2/vtweb/snap-token"
-    }
-  }
-}
+```http
+Content-Type: text/csv
+```
+
+```csv
+id,campaign,donor_name,donor_phone,amount,platform_tip,status,provider_status,created_at,paid_at
+8f89c67a-12bc-401d-9e12-3a8bc02d41ab,Bantu Renovasi Madrasah,Budi,+6281234567890,250000,5000,success,settlement,2026-06-22T19:10:00+07:00,2026-06-22T19:12:00+07:00
 ```
 
 ## Payments

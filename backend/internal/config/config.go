@@ -21,6 +21,10 @@ type Config struct {
 	WaitlistEmailURL   string
 	WaitlistAdminEmail string
 	CampaignAdminToken string
+	MidtransEnv        string
+	MidtransServerKey  string
+	MidtransClientKey  string
+	MidtransNotifyKey  string
 }
 
 func Load() *Config {
@@ -47,6 +51,10 @@ func Load() *Config {
 		WaitlistEmailURL:   getEnv("WAITLIST_EMAIL_URL", "https://kebaikanku.id/coming-soon"),
 		WaitlistAdminEmail: getEnv("WAITLIST_ADMIN_EMAIL", ""),
 		CampaignAdminToken: getEnv("CAMPAIGN_ADMIN_TOKEN", ""),
+		MidtransEnv:        getEnv("MIDTRANS_ENV", "sandbox"),
+		MidtransServerKey:  getEnv("MIDTRANS_SERVER_KEY", ""),
+		MidtransClientKey:  getEnv("MIDTRANS_CLIENT_KEY", ""),
+		MidtransNotifyKey:  getEnv("MIDTRANS_NOTIFICATION_TOKEN", ""),
 	}
 }
 

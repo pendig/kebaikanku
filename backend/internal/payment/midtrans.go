@@ -3,7 +3,10 @@ package payment
 import (
 	"bytes"
 	"context"
+	"crypto/sha512"
+	"crypto/subtle"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -44,6 +47,15 @@ func NewMidtransClient(env, serverKey string) *MidtransClient {
 			Timeout: 15 * time.Second,
 		},
 	}
+}
+
+func VerifyMidtransSignature(orderID, statusCode, grossAmount, serverKey, signature string) bool {
+	if orderID == "" || statusCode == "" || grossAmount == "" || serverKey == "" || signature == "" {
+		return false
+	}
+	sum := sha512.Sum512([]byte(orderID + statusCode + grossAmount + serverKey))
+	expected := hex.EncodeToString(sum[:])
+	return subtle.ConstantTimeCompare([]byte(expected), []byte(strings.ToLower(signature))) == 1
 }
 
 func (c *MidtransClient) CreateSnapTransaction(ctx context.Context, req SnapRequest) (*SnapResponse, error) {

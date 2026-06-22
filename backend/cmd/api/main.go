@@ -83,6 +83,7 @@ func main() {
 	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 	r.Post("/api/v1/campaigns", handleCreateCampaign)
 	r.Post("/api/v1/donations", handleCreateDonation)
+	r.Post("/api/v1/payments/midtrans/notification", handleMidtransNotification)
 
 	// 5. Start Server
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
@@ -282,6 +283,50 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleMidtransNotification(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	if appConfig.MidtransNotifyKey != "" && subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Notification-Token")), []byte(appConfig.MidtransNotifyKey)) != 1 {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid notification token is required.")
+		return
+	}
+
+	var req midtransNotificationPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	if !payment.VerifyMidtransSignature(req.OrderID, req.StatusCode, req.GrossAmount, appConfig.MidtransServerKey, req.SignatureKey) {
+		writeAPIError(w, http.StatusUnauthorized, "INVALID_SIGNATURE", "Midtrans signature is invalid.")
+		return
+	}
+
+	rawPayload, _ := json.Marshal(req)
+	status := mapMidtransStatus(req.TransactionStatus, req.FraudStatus)
+	paidAt := parseMidtransTime(req.TransactionTime)
+	counted, err := appStore.ApplyPaymentStatus(req.OrderID, req.TransactionStatus, req.TransactionID, string(rawPayload), status, paidAt)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			writeAPIError(w, http.StatusNotFound, "DONATION_NOT_FOUND", "Donation was not found.")
+			return
+		}
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not process payment notification.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"message": "notification processed successfully",
+			"status":  status,
+			"counted": counted,
+		},
+	})
+}
+
 func queryInt(r *http.Request, key string, fallback int) int {
 	value := strings.TrimSpace(r.URL.Query().Get(key))
 	if value == "" {
@@ -299,6 +344,30 @@ func defaultString(value, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func mapMidtransStatus(transactionStatus, fraudStatus string) string {
+	switch strings.ToLower(transactionStatus) {
+	case "capture":
+		if strings.EqualFold(fraudStatus, "accept") {
+			return "success"
+		}
+		return "pending"
+	case "settlement":
+		return "success"
+	case "deny", "cancel", "expire", "failure":
+		return "failed"
+	default:
+		return "pending"
+	}
+}
+
+func parseMidtransTime(value string) *time.Time {
+	parsed, err := time.Parse("2006-01-02 15:04:05", strings.TrimSpace(value))
+	if err != nil {
+		return nil
+	}
+	return &parsed
 }
 
 func hasAdminToken(r *http.Request) bool {
@@ -337,6 +406,19 @@ type donationPayload struct {
 	Amount        float64      `json:"amount"`
 	PlatformTip   float64      `json:"platform_tip"`
 	PaymentMethod string       `json:"payment_method"`
+}
+
+type midtransNotificationPayload struct {
+	TransactionTime   string `json:"transaction_time"`
+	TransactionStatus string `json:"transaction_status"`
+	TransactionID     string `json:"transaction_id"`
+	FraudStatus       string `json:"fraud_status"`
+	StatusCode        string `json:"status_code"`
+	SignatureKey      string `json:"signature_key"`
+	PaymentType       string `json:"payment_type"`
+	OrderID           string `json:"order_id"`
+	GrossAmount       string `json:"gross_amount"`
+	Currency          string `json:"currency"`
 }
 
 type apiErrorResponse struct {

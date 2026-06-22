@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"time"
 
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
 	"gorm.io/gorm"
@@ -70,6 +71,41 @@ func (s *Store) UpdateDonationProvider(donationID, providerOrderID, providerStat
 		"provider_order_id": providerOrderID,
 		"provider_status":   providerStatus,
 	}).Error
+}
+
+func (s *Store) ApplyPaymentStatus(orderID, providerStatus, providerTransactionID, providerPayload, status string, paidAt *time.Time) (bool, error) {
+	var counted bool
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		var donation domain.Donation
+		if err := tx.Where("provider_order_id = ?", orderID).First(&donation).Error; err != nil {
+			return err
+		}
+
+		finalStatus := status
+		if donation.Status == "success" {
+			finalStatus = "success"
+		}
+
+		updates := map[string]any{
+			"status":                  finalStatus,
+			"provider_status":         providerStatus,
+			"provider_transaction_id": providerTransactionID,
+			"provider_payload":        providerPayload,
+		}
+		if paidAt != nil {
+			updates["paid_at"] = paidAt
+		}
+
+		if status == "success" && donation.Status != "success" {
+			if err := tx.Model(&domain.Campaign{}).Where("id = ?", donation.CampaignID).UpdateColumn("collected_amount", gorm.Expr("collected_amount + ?", donation.Amount)).Error; err != nil {
+				return err
+			}
+			counted = true
+		}
+
+		return tx.Model(&domain.Donation{}).Where("id = ?", donation.ID).Updates(updates).Error
+	})
+	return counted, err
 }
 
 func (s *Store) GetDonation(id string) (*domain.Donation, error) {

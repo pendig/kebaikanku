@@ -37,6 +37,7 @@ func Init(cfg *config.Config) *gorm.DB {
 
 	// Run auto migrations
 	err = DB.AutoMigrate(
+		&domain.SchemaMigration{},
 		&domain.Organization{},
 		&domain.Campaign{},
 		&domain.Donor{},
@@ -48,5 +49,14 @@ func Init(cfg *config.Config) *gorm.DB {
 	}
 	fmt.Println("Database schema migrated successfully.")
 
+	recordSchemaVersion(DB, "20260622_alpha_mvp")
+
 	return DB
+}
+
+func recordSchemaVersion(db *gorm.DB, version string) {
+	migration := domain.SchemaMigration{Version: version}
+	if err := db.FirstOrCreate(&migration, domain.SchemaMigration{Version: version}).Error; err != nil {
+		log.Fatalf("Failed to record schema migration %s: %v", version, err)
+	}
 }

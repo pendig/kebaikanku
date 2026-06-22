@@ -38,6 +38,7 @@ CAMPAIGN_ADMIN_TOKEN=change-me
 MIDTRANS_ENV=sandbox
 MIDTRANS_SERVER_KEY=SB-Mid-server-...
 MIDTRANS_CLIENT_KEY=SB-Mid-client-...
+MIDTRANS_NOTIFICATION_TOKEN=change-me-optional-extra-guard
 ```
 
 ## Sandbox E2E
@@ -73,18 +74,27 @@ cd frontend/landing
 PUBLIC_API_BASE_URL=http://localhost:8080 npm run dev
 ```
 
-4. Open `/campaigns`, submit the donation form, and confirm it redirects to Midtrans sandbox.
+4. Validate the production frontend build:
 
-5. After payment completion, verify donation export:
+```bash
+cd frontend/landing
+npm run build
+```
+
+5. Open `/campaigns`, submit the donation form, and confirm it redirects to Midtrans sandbox.
+
+6. After payment completion, verify donation export:
 
 ```bash
 curl http://localhost:8080/api/v1/donations/export \
   -H "Authorization: Bearer $CAMPAIGN_ADMIN_TOKEN"
 ```
 
+Confirm the exported row has `status` set to `success` and `provider_status` set to `settlement` or `capture`.
+
 ## Release Gate
 
 - `go test ./...` passes in `backend`.
 - `npm run build` passes in `frontend/landing`.
 - Sandbox payment redirects to Midtrans.
-- Sandbox notification marks the donation as `success`.
+- Sandbox notification marks the donation as `success`; verify it from `GET /api/v1/donations/export`.

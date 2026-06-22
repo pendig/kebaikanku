@@ -1,9 +1,8 @@
 <script>
 	import { onMount } from 'svelte';
-	import { env } from '$env/dynamic/public';
 	import { t } from '$lib/i18n';
 
-	const apiBase = (env.PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
+	const apiBase = (import.meta.env.PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
 	let campaigns = $state([]);
 	let selectedCategory = $state('all');
@@ -23,6 +22,7 @@
 
 	let filteredCampaigns = $derived(
 		campaigns.filter((campaign) => {
+			if (!campaign) return false;
 			const category = campaign.category || '';
 			const matchesCategory = selectedCategory === 'all' || category === selectedCategory;
 			const q = searchQuery.toLowerCase();
@@ -33,6 +33,16 @@
 		})
 	);
 
+	$effect(() => {
+		const currentId = activeCampaign?.id;
+		const stillVisible = currentId
+			? filteredCampaigns.some((campaign) => campaign?.id === currentId)
+			: false;
+		if (!stillVisible) {
+			activeCampaign = filteredCampaigns[0] || null;
+		}
+	});
+
 	onMount(loadCampaigns);
 
 	async function loadCampaigns() {
@@ -41,10 +51,10 @@
 		try {
 			const response = await fetch(`${apiBase}/api/v1/campaigns?limit=100`);
 			const payload = await response.json();
-			if (!response.ok || !payload.success) {
-				throw new Error(payload.error?.message || 'Could not load campaigns.');
+			if (!response.ok || !payload?.success) {
+				throw new Error(payload?.error?.message || 'Could not load campaigns.');
 			}
-			campaigns = payload.data?.campaigns || [];
+			campaigns = payload?.data?.campaigns || [];
 			activeCampaign = campaigns[0] || null;
 		} catch (err) {
 			error = err.message || 'Could not load campaigns.';
@@ -75,10 +85,14 @@
 				})
 			});
 			const payload = await response.json();
-			if (!response.ok || !payload.success) {
-				throw new Error(payload.error?.message || 'Could not start payment.');
+			if (!response.ok || !payload?.success) {
+				throw new Error(payload?.error?.message || 'Could not start payment.');
 			}
-			window.location.href = payload.data.payment.redirect_url;
+			const redirectUrl = payload?.data?.payment?.redirect_url;
+			if (!redirectUrl) {
+				throw new Error('Payment redirect URL is missing.');
+			}
+			window.location.href = redirectUrl;
 		} catch (err) {
 			donationError = err.message || 'Could not start payment.';
 			submitting = false;

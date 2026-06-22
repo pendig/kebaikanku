@@ -51,15 +51,18 @@ func (s *Store) CreateCampaign(campaign *domain.Campaign) error {
 }
 
 func (s *Store) FindOrCreateDonor(donor *domain.Donor) (*domain.Donor, error) {
-	var existing domain.Donor
-	err := s.db.Where("phone_number = ?", donor.PhoneNumber).First(&existing).Error
-	if err == nil {
-		return &existing, nil
-	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := s.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "phone_number"}},
+		DoNothing: true,
+	}).Create(donor).Error; err != nil {
 		return nil, err
 	}
-	return donor, s.db.Create(donor).Error
+
+	var existing domain.Donor
+	if err := s.db.Where("phone_number = ?", donor.PhoneNumber).First(&existing).Error; err != nil {
+		return nil, err
+	}
+	return &existing, nil
 }
 
 func (s *Store) CreateDonation(donation *domain.Donation) error {

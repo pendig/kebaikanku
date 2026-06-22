@@ -82,6 +82,7 @@ See [frontend/landing/README.md](frontend/landing/README.md) for local developme
 ## Documentation
 
 - [System architecture](docs/architecture.md)
+- [MVP scope](docs/mvp-scope.md)
 - [Database architecture](docs/database.md)
 - [API contract](docs/api.md)
 - [Deployment guide](docs/deployment.md)

@@ -103,12 +103,13 @@ func (c *MidtransClient) CreateSnapTransaction(ctx context.Context, req SnapRequ
 	}
 	defer res.Body.Close()
 
+	if res.StatusCode < 200 || res.StatusCode > 299 {
+		return nil, fmt.Errorf("midtrans snap request failed: status %d", res.StatusCode)
+	}
+
 	var snap SnapResponse
 	if err := json.NewDecoder(res.Body).Decode(&snap); err != nil {
 		return nil, err
-	}
-	if res.StatusCode < 200 || res.StatusCode > 299 {
-		return nil, fmt.Errorf("midtrans snap request failed: status %d", res.StatusCode)
 	}
 	return &snap, nil
 }

@@ -38,6 +38,7 @@ var (
 	waitlistRequestWindow = map[string]time.Time{}
 	waitlistRequestGuard  sync.Mutex
 	waitlistEmailRegex    = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+	campaignSlugRegex     = regexp.MustCompile(`^[a-z0-9-]+$`)
 	appConfig             *config.Config
 	appStore              *repository.Store
 	appPayment            *payment.MidtransClient
@@ -184,6 +185,10 @@ func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
 		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "organization_id, title, slug, category, and positive target_amount are required.")
 		return
 	}
+	if !campaignSlugRegex.MatchString(campaign.Slug) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "slug must only contain lowercase alphanumeric characters and hyphens.")
+		return
+	}
 
 	if err := appStore.CreateCampaign(&campaign); err != nil {
 		if isDuplicateDBError(err) {
@@ -231,6 +236,14 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 	}
 	if donor.Name == "" || donor.PhoneNumber == "" || req.Amount <= 0 || req.PlatformTip < 0 {
 		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor name, donor phone, positive amount, and non-negative platform_tip are required.")
+		return
+	}
+	if donor.Email != "" && !waitlistEmailRegex.MatchString(donor.Email) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor email must be a valid email address.")
+		return
+	}
+	if req.Amount != math.Trunc(req.Amount) || req.PlatformTip != math.Trunc(req.PlatformTip) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "amount and platform_tip must be whole numbers.")
 		return
 	}
 
@@ -335,7 +348,11 @@ func handleExportDonations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	donations, err := appStore.ListDonations(queryInt(r, "limit", 1000))
+	limit := queryInt(r, "limit", 1000)
+	if limit < 1 || limit > 5000 {
+		limit = 1000
+	}
+	donations, err := appStore.ListDonations(limit)
 	if err != nil {
 		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not export donations.")
 		return
@@ -412,7 +429,8 @@ func mapMidtransStatus(transactionStatus, fraudStatus string) string {
 }
 
 func parseMidtransTime(value string) *time.Time {
-	parsed, err := time.Parse("2006-01-02 15:04:05", strings.TrimSpace(value))
+	loc := time.FixedZone("WIB", 7*3600)
+	parsed, err := time.ParseInLocation("2006-01-02 15:04:05", strings.TrimSpace(value), loc)
 	if err != nil {
 		return nil
 	}

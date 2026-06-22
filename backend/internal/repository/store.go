@@ -6,6 +6,7 @@ import (
 
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Store struct {
@@ -77,7 +78,7 @@ func (s *Store) ApplyPaymentStatus(orderID, providerStatus, providerTransactionI
 	var counted bool
 	err := s.db.Transaction(func(tx *gorm.DB) error {
 		var donation domain.Donation
-		if err := tx.Where("provider_order_id = ?", orderID).First(&donation).Error; err != nil {
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("provider_order_id = ?", orderID).First(&donation).Error; err != nil {
 			return err
 		}
 
@@ -92,7 +93,7 @@ func (s *Store) ApplyPaymentStatus(orderID, providerStatus, providerTransactionI
 			"provider_transaction_id": providerTransactionID,
 			"provider_payload":        providerPayload,
 		}
-		if paidAt != nil {
+		if status == "success" && paidAt != nil {
 			updates["paid_at"] = paidAt
 		}
 

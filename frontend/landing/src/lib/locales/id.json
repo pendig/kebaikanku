@@ -120,10 +120,26 @@
     "filter_zakat": "Zakat",
     "filter_kemanusiaan": "Kemanusiaan",
     "filter_infak": "Infak & Sedekah",
+    "badge": "MVP Donasi",
+    "category_all": "Semua",
+    "category_zakat_maal": "Zakat Maal",
+    "category_zakat_fitrah": "Zakat Fitrah",
+    "category_infak": "Infak",
+    "category_kemanusiaan": "Kemanusiaan",
     "search_placeholder": "Cari kampanye...",
     "days_left": "hari lagi",
     "collected": "Terkumpul",
     "target": "Target",
-    "donate_now": "Donasi Sekarang"
+    "donate_now": "Donasi Sekarang",
+    "loading": "Memuat kampanye...",
+    "empty": "Belum ada kampanye aktif.",
+    "select_first": "Pilih kampanye untuk mulai donasi.",
+    "form_name": "Nama Donatur",
+    "form_phone": "Nomor WhatsApp",
+    "form_email": "Email (opsional)",
+    "form_amount": "Nominal",
+    "form_tip": "Tip Platform",
+    "pay_with_midtrans": "Bayar dengan Midtrans",
+    "redirecting": "Mengalihkan..."
   }
 }

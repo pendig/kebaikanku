@@ -120,10 +120,26 @@
     "filter_zakat": "Zakat",
     "filter_kemanusiaan": "Humanitarian",
     "filter_infak": "Infak & Alms",
+    "badge": "Donation MVP",
+    "category_all": "All",
+    "category_zakat_maal": "Zakat Maal",
+    "category_zakat_fitrah": "Zakat Fitrah",
+    "category_infak": "Infak",
+    "category_kemanusiaan": "Humanitarian",
     "search_placeholder": "Search campaigns...",
     "days_left": "days left",
     "collected": "Collected",
     "target": "Target",
-    "donate_now": "Donate Now"
+    "donate_now": "Donate Now",
+    "loading": "Loading campaigns...",
+    "empty": "No active campaigns yet.",
+    "select_first": "Select a campaign to start donating.",
+    "form_name": "Donor Name",
+    "form_phone": "WhatsApp Number",
+    "form_email": "Email (optional)",
+    "form_amount": "Amount",
+    "form_tip": "Platform Tip",
+    "pay_with_midtrans": "Pay with Midtrans",
+    "redirecting": "Redirecting..."
   }
 }

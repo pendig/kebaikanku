@@ -60,6 +60,7 @@ go build -o bin/api ./cmd/api
 | `MIDTRANS_CLIENT_KEY` | empty | Midtrans client key for frontend Snap usage. |
 | `MIDTRANS_NOTIFICATION_TOKEN` | empty | Optional internal token if the callback route is additionally guarded. |
 | `JWT_SECRET` | empty | Required once auth is implemented. |
+| `CAMPAIGN_ADMIN_TOKEN` | empty | Temporary bearer token for pilot campaign creation before dashboard auth exists. |
 | `SMTP_HOST` | empty | SMTP host for transactional email. If empty, waitlist email is skipped. |
 | `SMTP_PORT` | `587` | SMTP port. Local dev uses `1025` with Mailpit-compatible SMTP. |
 | `SMTP_USER` | empty | SMTP username. |

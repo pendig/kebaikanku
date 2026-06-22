@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -76,6 +77,7 @@ func main() {
 	r.Post("/api/v1/waitlist", handleWaitlistSignup)
 	r.Get("/api/v1/campaigns", handleListCampaigns)
 	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
+	r.Post("/api/v1/campaigns", handleCreateCampaign)
 
 	// 5. Start Server
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
@@ -138,6 +140,61 @@ func handleGetCampaign(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	if !hasAdminToken(r) {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid campaign admin token is required.")
+		return
+	}
+
+	var req campaignPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	endDate, err := time.Parse(time.RFC3339, strings.TrimSpace(req.EndDate))
+	if err != nil {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "end_date must use RFC3339 format.")
+		return
+	}
+
+	campaign := domain.Campaign{
+		ID:             randomID(),
+		OrganizationID: strings.TrimSpace(req.OrganizationID),
+		Title:          strings.TrimSpace(req.Title),
+		Slug:           strings.TrimSpace(req.Slug),
+		Description:    strings.TrimSpace(req.Description),
+		Category:       strings.TrimSpace(req.Category),
+		TargetAmount:   req.TargetAmount,
+		EndDate:        endDate,
+		Status:         "active",
+	}
+	if campaign.OrganizationID == "" || campaign.Title == "" || campaign.Slug == "" || campaign.Category == "" || campaign.TargetAmount <= 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "organization_id, title, slug, category, and positive target_amount are required.")
+		return
+	}
+
+	if err := appStore.CreateCampaign(&campaign); err != nil {
+		if isDuplicateDBError(err) {
+			writeAPIError(w, http.StatusConflict, "DUPLICATE_CAMPAIGN", "Campaign slug is already used.")
+			return
+		}
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not create campaign.")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaign": campaign,
+		},
+	})
+}
+
 func queryInt(r *http.Request, key string, fallback int) int {
 	value := strings.TrimSpace(r.URL.Query().Get(key))
 	if value == "" {
@@ -150,10 +207,28 @@ func queryInt(r *http.Request, key string, fallback int) int {
 	return parsed
 }
 
+func hasAdminToken(r *http.Request) bool {
+	if appConfig == nil || appConfig.CampaignAdminToken == "" {
+		return false
+	}
+	token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	return subtle.ConstantTimeCompare([]byte(token), []byte(appConfig.CampaignAdminToken)) == 1
+}
+
 type waitlistPayload struct {
 	Email   string `json:"email"`
 	Website string `json:"website"`
 	Source  string `json:"source"`
+}
+
+type campaignPayload struct {
+	OrganizationID string  `json:"organization_id"`
+	Title          string  `json:"title"`
+	Slug           string  `json:"slug"`
+	Description    string  `json:"description"`
+	Category       string  `json:"category"`
+	TargetAmount   float64 `json:"target_amount"`
+	EndDate        string  `json:"end_date"`
 }
 
 type apiErrorResponse struct {

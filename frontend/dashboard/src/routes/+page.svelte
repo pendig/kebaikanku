@@ -16,17 +16,24 @@
 		description: '',
 		category: 'infak',
 		target_amount: 10000000,
-		end_date: '2026-12-31T23:59:59+07:00'
+		end_date: '2026-12-31T23:59'
 	});
 
 	onMount(() => {
-		token = localStorage.getItem('campaign_admin_token') || '';
+		token = sessionStorage.getItem('campaign_admin_token') || '';
 		loadCampaigns();
 		if (token) loadDonations();
 	});
 
 	function saveToken() {
-		localStorage.setItem('campaign_admin_token', token);
+		token = token.trim();
+		if (token) {
+			sessionStorage.setItem('campaign_admin_token', token);
+			loadDonations();
+		} else {
+			sessionStorage.removeItem('campaign_admin_token');
+			donations = [];
+		}
 		message = 'Token saved.';
 		error = '';
 	}
@@ -63,7 +70,11 @@
 			const response = await api('/api/v1/campaigns', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ ...campaign, target_amount: Number(campaign.target_amount) })
+				body: JSON.stringify({
+					...campaign,
+					target_amount: Number(campaign.target_amount),
+					end_date: new Date(campaign.end_date).toISOString()
+				})
 			});
 			const payload = await response.json();
 			if (!response.ok || !payload?.success) throw new Error(payload?.error?.message || 'Could not create campaign.');
@@ -83,8 +94,18 @@
 		error = '';
 		try {
 			const response = await api('/api/v1/donations/export');
+			if (!response.ok) {
+				let errMsg = 'Could not load donations.';
+				const body = await response.text();
+				try {
+					const payload = JSON.parse(body);
+					errMsg = payload?.error?.message || errMsg;
+				} catch {
+					errMsg = body || errMsg;
+				}
+				throw new Error(errMsg);
+			}
 			const csv = await response.text();
-			if (!response.ok) throw new Error(csv || 'Could not load donations.');
 			donations = parseCSV(csv);
 		} catch (err) {
 			error = err.message || 'Could not load donations.';
@@ -92,13 +113,35 @@
 	}
 
 	function parseCSV(csv) {
-		const [headerLine, ...rows] = csv.trim().split('\n');
-		if (!headerLine) return [];
-		const headers = headerLine.split(',');
-		return rows.map((row) => {
-			const values = row.split(',');
-			return Object.fromEntries(headers.map((key, index) => [key, values[index] || '']));
-		});
+		const rows = [];
+		let row = [];
+		let cell = '';
+		let quoted = false;
+		for (let i = 0; i < csv.length; i += 1) {
+			const char = csv[i];
+			const next = csv[i + 1];
+			if (char === '"' && quoted && next === '"') {
+				cell += '"';
+				i += 1;
+			} else if (char === '"') {
+				quoted = !quoted;
+			} else if (char === ',' && !quoted) {
+				row.push(cell);
+				cell = '';
+			} else if ((char === '\n' || char === '\r') && !quoted) {
+				if (char === '\r' && next === '\n') i += 1;
+				row.push(cell);
+				if (row.some(Boolean)) rows.push(row);
+				row = [];
+				cell = '';
+			} else {
+				cell += char;
+			}
+		}
+		row.push(cell);
+		if (row.some(Boolean)) rows.push(row);
+		const [headers = [], ...records] = rows;
+		return records.map((values) => Object.fromEntries(headers.map((key, index) => [key, values[index] || ''])));
 	}
 
 	function slugify() {
@@ -130,7 +173,7 @@
 				<p class="text-sm text-slate-600">Campaign operations with admin token. Full signup/login later.</p>
 			</div>
 			<div class="flex gap-2">
-				<input bind:value={token} class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm md:w-80" placeholder="CAMPAIGN_ADMIN_TOKEN" />
+				<input bind:value={token} type="password" autocomplete="off" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm md:w-80" placeholder="CAMPAIGN_ADMIN_TOKEN" />
 				<button onclick={saveToken} class="rounded-lg bg-slate-950 px-4 py-2 text-sm font-bold text-white">Save</button>
 			</div>
 		</header>
@@ -158,7 +201,7 @@
 				</label>
 				<div class="grid grid-cols-2 gap-3">
 					<label>Target<input bind:value={campaign.target_amount} min="1" step="1" type="number" required /></label>
-					<label>End date<input bind:value={campaign.end_date} required /></label>
+					<label>End date<input bind:value={campaign.end_date} type="datetime-local" required /></label>
 				</div>
 				<button disabled={loading || !token} class="mt-4 w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-black text-white disabled:opacity-50">Create</button>
 			</form>
@@ -232,8 +275,57 @@
 	textarea {
 		min-height: 6rem;
 	}
+	main {
+		min-height: 100vh;
+		background: #f1f5f9;
+		padding: 1.25rem;
+		color: #020617;
+	}
+	main > div {
+		max-width: 80rem;
+		margin: 0 auto;
+	}
+	header {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 1rem;
+		border-bottom: 1px solid #cbd5e1;
+		padding-bottom: 1.25rem;
+	}
+	header p {
+		color: #475569;
+	}
+	form,
+	section section,
+	article {
+		border: 1px solid #cbd5e1;
+		border-radius: 0.85rem;
+		background: white;
+		padding: 1.25rem;
+	}
+	button {
+		border: 0;
+		border-radius: 0.6rem;
+		background: #0f172a;
+		color: white;
+		padding: 0.7rem 1rem;
+		font-weight: 800;
+		cursor: pointer;
+	}
+	button:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
 	th, td {
 		padding: 0.7rem 0.5rem;
 		white-space: nowrap;
+	}
+	@media (min-width: 900px) {
+		main > div > section {
+			display: grid;
+			grid-template-columns: 420px 1fr;
+			gap: 1.25rem;
+		}
 	}
 </style>

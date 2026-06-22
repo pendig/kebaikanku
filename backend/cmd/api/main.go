@@ -2,14 +2,18 @@ package main
 
 import (
 	"crypto/rand"
+	"crypto/subtle"
+	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net"
 	"net/http"
 	"net/mail"
 	"net/smtp"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,6 +24,8 @@ import (
 	"github.com/kebaikankuid/kebaikanku/backend/internal/config"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/database"
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
+	"github.com/kebaikankuid/kebaikanku/backend/internal/payment"
+	"github.com/kebaikankuid/kebaikanku/backend/internal/repository"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +38,10 @@ var (
 	waitlistRequestWindow = map[string]time.Time{}
 	waitlistRequestGuard  sync.Mutex
 	waitlistEmailRegex    = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+	campaignSlugRegex     = regexp.MustCompile(`^[a-z0-9-]+$`)
 	appConfig             *config.Config
+	appStore              *repository.Store
+	appPayment            *payment.MidtransClient
 )
 
 func main() {
@@ -42,6 +51,8 @@ func main() {
 
 	// 2. Initialize Database and Auto-migrate
 	database.Init(cfg)
+	appStore = repository.NewStore(database.DB)
+	appPayment = payment.NewMidtransClient(cfg.MidtransEnv, cfg.MidtransServerKey)
 
 	// 3. Setup Router
 	r := chi.NewRouter()
@@ -70,6 +81,12 @@ func main() {
 		_, _ = w.Write([]byte(`{"status":"healthy","time":"` + time.Now().Format(time.RFC3339) + `"}`))
 	})
 	r.Post("/api/v1/waitlist", handleWaitlistSignup)
+	r.Get("/api/v1/campaigns", handleListCampaigns)
+	r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
+	r.Post("/api/v1/campaigns", handleCreateCampaign)
+	r.Post("/api/v1/donations", handleCreateDonation)
+	r.Get("/api/v1/donations/export", handleExportDonations)
+	r.Post("/api/v1/payments/midtrans/notification", handleMidtransNotification)
 
 	// 5. Start Server
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
@@ -81,10 +98,394 @@ func main() {
 	}
 }
 
+func handleListCampaigns(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	limit := queryInt(r, "limit", 20)
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	page := queryInt(r, "page", 1)
+	if page < 1 {
+		page = 1
+	}
+
+	campaigns, err := appStore.ListActiveCampaigns(strings.TrimSpace(r.URL.Query().Get("category")), limit, (page-1)*limit)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaigns.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaigns": campaigns,
+			"page":      page,
+			"limit":     limit,
+		},
+	})
+}
+
+func handleGetCampaign(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	campaign, err := appStore.GetActiveCampaignBySlug(strings.TrimSpace(chi.URLParam(r, "slug")))
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaign.")
+		return
+	}
+	if campaign == nil {
+		writeAPIError(w, http.StatusNotFound, "CAMPAIGN_NOT_FOUND", "Campaign was not found.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaign": campaign,
+		},
+	})
+}
+
+func handleCreateCampaign(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	if !hasAdminToken(r) {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid campaign admin token is required.")
+		return
+	}
+
+	var req campaignPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	endDate, err := time.Parse(time.RFC3339, strings.TrimSpace(req.EndDate))
+	if err != nil {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "end_date must use RFC3339 format.")
+		return
+	}
+
+	campaign := domain.Campaign{
+		ID:             randomID(),
+		OrganizationID: strings.TrimSpace(req.OrganizationID),
+		Title:          strings.TrimSpace(req.Title),
+		Slug:           strings.TrimSpace(req.Slug),
+		Description:    strings.TrimSpace(req.Description),
+		Category:       strings.TrimSpace(req.Category),
+		TargetAmount:   req.TargetAmount,
+		EndDate:        endDate,
+		Status:         "active",
+	}
+	if campaign.OrganizationID == "" || campaign.Title == "" || campaign.Slug == "" || campaign.Category == "" || campaign.TargetAmount <= 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "organization_id, title, slug, category, and positive target_amount are required.")
+		return
+	}
+	if !campaignSlugRegex.MatchString(campaign.Slug) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "slug must only contain lowercase alphanumeric characters and hyphens.")
+		return
+	}
+
+	if err := appStore.CreateCampaign(&campaign); err != nil {
+		if isDuplicateDBError(err) {
+			writeAPIError(w, http.StatusConflict, "DUPLICATE_CAMPAIGN", "Campaign slug is already used.")
+			return
+		}
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not create campaign.")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"campaign": campaign,
+		},
+	})
+}
+
+func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	var req donationPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	campaign, err := appStore.GetActiveCampaignByID(strings.TrimSpace(req.CampaignID))
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not load campaign.")
+		return
+	}
+	if campaign == nil {
+		writeAPIError(w, http.StatusNotFound, "CAMPAIGN_NOT_FOUND", "Campaign was not found.")
+		return
+	}
+
+	donor := domain.Donor{
+		ID:          randomID(),
+		Name:        strings.TrimSpace(req.Donor.Name),
+		PhoneNumber: strings.TrimSpace(req.Donor.PhoneNumber),
+		Email:       strings.TrimSpace(req.Donor.Email),
+	}
+	if donor.Name == "" || donor.PhoneNumber == "" || req.Amount <= 0 || req.PlatformTip < 0 {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor name, donor phone, positive amount, and non-negative platform_tip are required.")
+		return
+	}
+	if donor.Email != "" && !waitlistEmailRegex.MatchString(donor.Email) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "donor email must be a valid email address.")
+		return
+	}
+	if req.Amount != math.Trunc(req.Amount) || req.PlatformTip != math.Trunc(req.PlatformTip) {
+		writeAPIError(w, http.StatusBadRequest, "VALIDATION_FAILED", "amount and platform_tip must be whole numbers.")
+		return
+	}
+
+	donorRecord, err := appStore.FindOrCreateDonor(&donor)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not save donor.")
+		return
+	}
+
+	donation := domain.Donation{
+		ID:             randomID(),
+		CampaignID:     campaign.ID,
+		DonorID:        donorRecord.ID,
+		Amount:         req.Amount,
+		PlatformTip:    req.PlatformTip,
+		Status:         "pending",
+		PaymentMethod:  defaultString(strings.TrimSpace(req.PaymentMethod), "midtrans_snap"),
+		Provider:       "midtrans",
+		ProviderStatus: "pending",
+	}
+	donation.ProviderOrderID = donation.ID
+	if err := appStore.CreateDonation(&donation); err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not create donation.")
+		return
+	}
+
+	snap, err := appPayment.CreateSnapTransaction(r.Context(), payment.SnapRequest{
+		OrderID:     donation.ProviderOrderID,
+		GrossAmount: int64(math.Round(req.Amount + req.PlatformTip)),
+		DonorName:   donorRecord.Name,
+		DonorEmail:  donorRecord.Email,
+		DonorPhone:  donorRecord.PhoneNumber,
+		ItemName:    campaign.Title,
+	})
+	if err != nil {
+		writeAPIError(w, http.StatusBadGateway, "PAYMENT_PROVIDER_ERROR", "Could not start Midtrans payment.")
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"donation_id": donation.ID,
+			"status":      donation.Status,
+			"payment": map[string]any{
+				"provider":     "midtrans",
+				"snap_token":   snap.Token,
+				"redirect_url": snap.RedirectURL,
+			},
+		},
+	})
+}
+
+func handleMidtransNotification(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	w.Header().Set("Content-Type", "application/json")
+
+	if appConfig.MidtransNotifyKey != "" && subtle.ConstantTimeCompare([]byte(r.Header.Get("X-Notification-Token")), []byte(appConfig.MidtransNotifyKey)) != 1 {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid notification token is required.")
+		return
+	}
+
+	var req midtransNotificationPayload
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeAPIError(w, http.StatusBadRequest, "INVALID_JSON", "Payload must be valid JSON.")
+		return
+	}
+
+	if !payment.VerifyMidtransSignature(req.OrderID, req.StatusCode, req.GrossAmount, appConfig.MidtransServerKey, req.SignatureKey) {
+		writeAPIError(w, http.StatusUnauthorized, "INVALID_SIGNATURE", "Midtrans signature is invalid.")
+		return
+	}
+
+	rawPayload, _ := json.Marshal(req)
+	status := mapMidtransStatus(req.TransactionStatus, req.FraudStatus)
+	paidAt := parseMidtransTime(req.TransactionTime)
+	counted, err := appStore.ApplyPaymentStatus(req.OrderID, req.TransactionStatus, req.TransactionID, string(rawPayload), status, paidAt)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			writeAPIError(w, http.StatusNotFound, "DONATION_NOT_FOUND", "Donation was not found.")
+			return
+		}
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not process payment notification.")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(apiResponse{
+		Success: true,
+		Data: map[string]any{
+			"message": "notification processed successfully",
+			"status":  status,
+			"counted": counted,
+		},
+	})
+}
+
+func handleExportDonations(w http.ResponseWriter, r *http.Request) {
+	if !hasAdminToken(r) {
+		writeAPIError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Valid campaign admin token is required.")
+		return
+	}
+
+	limit := queryInt(r, "limit", 1000)
+	if limit < 1 || limit > 5000 {
+		limit = 1000
+	}
+	donations, err := appStore.ListDonations(limit)
+	if err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not export donations.")
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/csv")
+	w.Header().Set("Content-Disposition", `attachment; filename="donations.csv"`)
+	writer := csv.NewWriter(w)
+	_ = writer.Write([]string{"id", "campaign", "donor_name", "donor_phone", "amount", "platform_tip", "status", "provider_status", "created_at", "paid_at"})
+	for _, donation := range donations {
+		campaignTitle := ""
+		if donation.Campaign != nil {
+			campaignTitle = donation.Campaign.Title
+		}
+		donorName := ""
+		donorPhone := ""
+		if donation.Donor != nil {
+			donorName = donation.Donor.Name
+			donorPhone = donation.Donor.PhoneNumber
+		}
+		paidAt := ""
+		if donation.PaidAt != nil {
+			paidAt = donation.PaidAt.Format(time.RFC3339)
+		}
+		_ = writer.Write([]string{
+			donation.ID,
+			campaignTitle,
+			donorName,
+			donorPhone,
+			fmt.Sprintf("%.0f", donation.Amount),
+			fmt.Sprintf("%.0f", donation.PlatformTip),
+			donation.Status,
+			donation.ProviderStatus,
+			donation.CreatedAt.Format(time.RFC3339),
+			paidAt,
+		})
+	}
+	writer.Flush()
+}
+
+func queryInt(r *http.Request, key string, fallback int) int {
+	value := strings.TrimSpace(r.URL.Query().Get(key))
+	if value == "" {
+		return fallback
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return fallback
+	}
+	return parsed
+}
+
+func defaultString(value, fallback string) string {
+	if value == "" {
+		return fallback
+	}
+	return value
+}
+
+func mapMidtransStatus(transactionStatus, fraudStatus string) string {
+	switch strings.ToLower(transactionStatus) {
+	case "capture":
+		if strings.EqualFold(fraudStatus, "accept") {
+			return "success"
+		}
+		return "pending"
+	case "settlement":
+		return "success"
+	case "deny", "cancel", "expire", "failure":
+		return "failed"
+	default:
+		return "pending"
+	}
+}
+
+func parseMidtransTime(value string) *time.Time {
+	loc := time.FixedZone("WIB", 7*3600)
+	parsed, err := time.ParseInLocation("2006-01-02 15:04:05", strings.TrimSpace(value), loc)
+	if err != nil {
+		return nil
+	}
+	return &parsed
+}
+
+func hasAdminToken(r *http.Request) bool {
+	if appConfig == nil || appConfig.CampaignAdminToken == "" {
+		return false
+	}
+	token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+	return subtle.ConstantTimeCompare([]byte(token), []byte(appConfig.CampaignAdminToken)) == 1
+}
+
 type waitlistPayload struct {
 	Email   string `json:"email"`
 	Website string `json:"website"`
 	Source  string `json:"source"`
+}
+
+type campaignPayload struct {
+	OrganizationID string  `json:"organization_id"`
+	Title          string  `json:"title"`
+	Slug           string  `json:"slug"`
+	Description    string  `json:"description"`
+	Category       string  `json:"category"`
+	TargetAmount   float64 `json:"target_amount"`
+	EndDate        string  `json:"end_date"`
+}
+
+type donorPayload struct {
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+}
+
+type donationPayload struct {
+	CampaignID    string       `json:"campaign_id"`
+	Donor         donorPayload `json:"donor"`
+	Amount        float64      `json:"amount"`
+	PlatformTip   float64      `json:"platform_tip"`
+	PaymentMethod string       `json:"payment_method"`
+}
+
+type midtransNotificationPayload struct {
+	TransactionTime   string `json:"transaction_time"`
+	TransactionStatus string `json:"transaction_status"`
+	TransactionID     string `json:"transaction_id"`
+	FraudStatus       string `json:"fraud_status"`
+	StatusCode        string `json:"status_code"`
+	SignatureKey      string `json:"signature_key"`
+	PaymentType       string `json:"payment_type"`
+	OrderID           string `json:"order_id"`
+	GrossAmount       string `json:"gross_amount"`
+	Currency          string `json:"currency"`
 }
 
 type apiErrorResponse struct {
@@ -172,6 +573,10 @@ func handleWaitlistSignup(w http.ResponseWriter, r *http.Request) {
 }
 
 func writeWaitlistError(w http.ResponseWriter, status int, code, message string) {
+	writeAPIError(w, status, code, message)
+}
+
+func writeAPIError(w http.ResponseWriter, status int, code, message string) {
 	w.WriteHeader(status)
 	response := apiResponse{
 		Success: false,

@@ -4,7 +4,12 @@ This document defines the planned MVP REST API contract for kebaikanku.id.
 
 Current implementation status:
 - `GET /health` is implemented.
-- All `/api/v1/*` endpoints below are planned and should be implemented before dashboard integration.
+- `GET /api/v1/campaigns` and `GET /api/v1/campaigns/{slug}` are implemented.
+- `POST /api/v1/campaigns` is implemented with a temporary `CAMPAIGN_ADMIN_TOKEN` bearer token for pilot data.
+- `POST /api/v1/donations` creates local pending donations and returns Midtrans Snap checkout data.
+- `POST /api/v1/payments/midtrans/notification` verifies Midtrans signatures and applies idempotent status updates.
+- `GET /api/v1/donations/export` returns a CSV export for operator reconciliation.
+- Auth endpoints remain planned.
 
 ## Conventions
 
@@ -165,7 +170,7 @@ Query parameters:
 
 ### `POST /api/v1/campaigns`
 
-Creates a campaign. Requires organization JWT.
+Creates a campaign. For the MVP pilot, this requires `Authorization: Bearer <CAMPAIGN_ADMIN_TOKEN>`. Replace this with organization JWT once dashboard auth exists.
 
 Request:
 
@@ -201,6 +206,10 @@ Request:
   "payment_method": "midtrans_snap"
 }
 ```
+
+### `GET /api/v1/donations/export`
+
+Returns donation reconciliation data as CSV. Requires `Authorization: Bearer <CAMPAIGN_ADMIN_TOKEN>`.
 
 Response:
 

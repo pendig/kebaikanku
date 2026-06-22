@@ -11,14 +11,16 @@ Implemented:
 - GORM auto-migration for `Organization`, `Campaign`, `Donor`, and `Donation`.
 - HTTP router and middleware stack using `go-chi/chi`.
 - `GET /health`.
+- Public campaign list/detail endpoints.
+- Temporary bearer-token campaign creation for pilot data.
+- Donation creation with Midtrans Snap checkout.
+- Midtrans notification callback with idempotent campaign total updates.
+- CSV donation export for operator reconciliation.
 
 Not implemented yet:
 - Auth endpoints.
-- Campaign endpoints.
-- Donation endpoints.
-- Midtrans payment creation.
-- Midtrans notification callback.
 - JWT middleware and organization authorization.
+- Full dashboard campaign management.
 
 ## Requirements
 
@@ -102,13 +104,15 @@ DB_DSN=host=localhost user=kebaikanku password=kebaikanku dbname=kebaikanku port
 
 Current:
 - `GET /health`
+- `GET /api/v1/campaigns`
+- `GET /api/v1/campaigns/{slug}`
+- `POST /api/v1/campaigns` with `Authorization: Bearer <CAMPAIGN_ADMIN_TOKEN>`
+- `POST /api/v1/donations`
+- `GET /api/v1/donations/export` with `Authorization: Bearer <CAMPAIGN_ADMIN_TOKEN>`
+- `POST /api/v1/payments/midtrans/notification`
 
 Planned MVP:
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
-- `GET /api/v1/campaigns`
-- `POST /api/v1/campaigns`
-- `POST /api/v1/donations`
-- `POST /api/v1/payments/midtrans/notification`
 
 See [../docs/api.md](../docs/api.md) and [../docs/payment-gateway.md](../docs/payment-gateway.md).

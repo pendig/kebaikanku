@@ -54,6 +54,11 @@
 		if (!campaign?.target_amount) return 0;
 		return Math.min(Math.round(((campaign.collected_amount || 0) / campaign.target_amount) * 100), 100);
 	}
+
+	function clearFilters() {
+		selectedCategory = 'all';
+		searchQuery = '';
+	}
 </script>
 
 <svelte:head>
@@ -73,22 +78,26 @@
 			</div>
 
 			<div class="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-900 dark:bg-gray-950/40 md:flex-row md:items-center md:justify-between">
-				<div class="flex flex-wrap gap-2">
-					{#each [{id:'all', label:'Semua'}, {id:'zakat', label:'Zakat'}, {id:'infaq', label:'Infaq'}, {id:'qurban', label:'Qurban'}, {id:'donasi_lainnya', label:'Donasi Lainnya'}] as category}
+				<div class="flex flex-wrap gap-2" aria-label="Filter kategori kampanye">
+					{#each [{id:'all', label:$t('campaigns.category_all')}, {id:'zakat_maal', label:$t('campaigns.category_zakat_maal')}, {id:'zakat_fitrah', label:$t('campaigns.category_zakat_fitrah')}, {id:'infak', label:$t('campaigns.category_infak')}, {id:'kemanusiaan', label:$t('campaigns.category_kemanusiaan')}] as category}
 						<button
 							type="button"
 							onclick={() => (selectedCategory = category.id)}
+							aria-pressed={selectedCategory === category.id}
 							class="rounded-xl px-3 py-2 text-xs font-bold transition {selectedCategory === category.id ? 'bg-emerald-500 text-white' : 'border border-gray-200 bg-white text-gray-600 hover:border-emerald-300 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300'}"
 						>
 							{category.label}
 						</button>
 					{/each}
 				</div>
-				<input
-					bind:value={searchQuery}
-					class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-gray-800 dark:bg-gray-900 md:max-w-xs"
-					placeholder={$t('campaigns.search_placeholder')}
-				/>
+				<label class="w-full text-xs font-bold text-gray-600 dark:text-gray-300 md:max-w-xs">
+					{$t('campaigns.search_label')}
+					<input
+						bind:value={searchQuery}
+						class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-emerald-500 dark:border-gray-800 dark:bg-gray-900"
+						placeholder={$t('campaigns.search_placeholder')}
+					/>
+				</label>
 			</div>
 
 			{#if loading}
@@ -96,7 +105,12 @@
 			{:else if error}
 				<div class="rounded-2xl border border-red-200 bg-red-50 p-8 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">{error}</div>
 			{:else if filteredCampaigns.length === 0}
-				<div class="rounded-2xl border border-gray-200 bg-white p-8 text-sm text-gray-500 dark:border-gray-900 dark:bg-gray-950/40">{$t('campaigns.empty')}</div>
+				<div class="rounded-2xl border border-gray-200 bg-white p-8 text-sm text-gray-500 dark:border-gray-900 dark:bg-gray-950/40">
+					<p>{searchQuery || selectedCategory !== 'all' ? $t('campaigns.no_results') : $t('campaigns.empty')}</p>
+					{#if searchQuery || selectedCategory !== 'all'}
+						<button type="button" onclick={clearFilters} class="mt-4 rounded-xl border border-emerald-200 px-4 py-2 text-xs font-extrabold text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950/30">{$t('campaigns.clear_filters')}</button>
+					{/if}
+				</div>
 			{:else}
 				<div class="grid gap-4 md:grid-cols-2">
 					{#each filteredCampaigns as campaign (campaign.id)}
@@ -122,7 +136,7 @@
 									</div>
 									<div class="flex justify-between text-xs text-gray-500">
 										<span>{formatRupiah(campaign.collected_amount)} {$t('campaigns.collected')}</span>
-										<span>{campaign.campaign_type === 'open_amount' ? 'Unlimited' : formatRupiah(campaign.target_amount)}</span>
+										<span>{campaign.campaign_type === 'open_amount' ? $t('campaigns.unlimited') : formatRupiah(campaign.target_amount)}</span>
 									</div>
 								</div>
 							</div>

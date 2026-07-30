@@ -29,15 +29,6 @@
 	</div>
 
 	<div class="max-w-7xl mx-auto px-6 relative z-10 text-center space-y-8">
-		<!-- Badge -->
-		<div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-			<span class="flex h-2 w-2 relative">
-				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-				<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-			</span>
-			<span>{$t('hero.badge')}</span>
-		</div>
-
 		<!-- Title -->
 		<h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl mx-auto leading-[1.15] text-gray-900 dark:text-white">
 			{$t('hero.title').split('&')[0]} <span class="bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 dark:from-emerald-400 dark:via-teal-300 dark:to-emerald-400 bg-clip-text text-transparent">{$t('hero.title').split('&')[1] || ''}</span>
@@ -51,7 +42,7 @@
 		<!-- CTAs -->
 		<div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
 			<a
-				href="/coming-soon"
+				href="/campaigns"
 				class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold px-8 py-4 rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 hover:-translate-y-0.5 text-center cursor-pointer"
 			>
 				{$t('hero.cta_primary')}
@@ -96,17 +87,17 @@
 							</div>
 						</div>
 						<div class="bg-white dark:bg-gray-900/40 rounded-xl p-5 border border-gray-200 dark:border-gray-800/50 shadow-sm dark:shadow-none">
-							<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Voluntary Platform Fee</span>
-							<h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">0% Self-Hosted</h3>
-							<p class="text-xs text-gray-600 dark:text-gray-500 mt-2">No deductions from donors. Pay only payment gateway charges directly.</p>
+							<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Biaya platform</span>
+							<h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">0% untuk self-hosting</h3>
+							<p class="text-xs text-gray-600 dark:text-gray-500 mt-2">Deployment mandiri tidak mengenakan biaya platform wajib. Biaya transaksi payment gateway dapat berlaku.</p>
 							<div class="mt-4 inline-flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 px-2.5 py-1 rounded-full">
-								Sovereign Donation Model
+								Deployment mandiri
 							</div>
 						</div>
 						<div class="bg-white dark:bg-gray-900/40 rounded-xl p-5 border border-gray-200 dark:border-gray-800/50 shadow-sm dark:shadow-none">
-							<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">AI Auto-Report</span>
-							<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-1">Laporan Distribusi AI</h3>
-							<p class="text-xs text-gray-600 dark:text-gray-500 mt-2">Generate accountability reports automatically via field photo upload.</p>
+							<span class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Fitur tersedia</span>
+							<h3 class="text-lg font-bold text-gray-900 dark:text-white mt-1">Kampanye dan checkout</h3>
+							<p class="text-xs text-gray-600 dark:text-gray-500 mt-2">Laporan AI dan dashboard multi-pengguna masih berada di roadmap.</p>
 							<div class="mt-4 flex -space-x-2 overflow-hidden">
 								<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-900 bg-emerald-500 flex items-center justify-center text-[10px] font-bold text-white">WA</div>
 								<div class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-gray-900 bg-teal-600 flex items-center justify-center text-[10px] font-bold text-white">AI</div>
@@ -128,8 +119,8 @@
 			<p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{$t('stats.subheader')}</p>
 		</div>
 
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-			<!-- Traditional Platforms -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+			<!-- Public donation flow -->
 			<div class="bg-gray-100/30 dark:bg-gray-950/30 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 space-y-6 relative overflow-hidden group glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 blur-xl rounded-full"></div>
 				<div class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/10 flex items-center justify-center text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform duration-300">
@@ -155,18 +146,6 @@
 				<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{$t('stats.our_desc')}</p>
 			</div>
 
-			<!-- Our Cloud Model -->
-			<div class="bg-gray-100/30 dark:bg-gray-950/30 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 space-y-6 relative overflow-hidden group glow-card" onmousemove={handleMouseMove} role="presentation">
-				<div class="absolute top-0 right-0 w-24 h-24 bg-teal-500/5 blur-xl rounded-full"></div>
-				<div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-500/5 border border-teal-200 dark:border-teal-500/10 flex items-center justify-center text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform duration-300">
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 animate-float" style="animation-delay: 1s;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-					</svg>
-				</div>
-				<h3 class="text-xl font-bold text-gray-900 dark:text-white">{$t('stats.cloud_title')}</h3>
-				<div class="text-3xl font-extrabold text-teal-600 dark:text-teal-400">{$t('stats.cloud_fee')}</div>
-				<p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">{$t('stats.cloud_desc')}</p>
-			</div>
 		</div>
 	</div>
 </section>
@@ -268,7 +247,7 @@
 			<p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">{$t('pricing.subtitle')}</p>
 		</div>
 
-		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+		<div class="mx-auto grid max-w-xl grid-cols-1 gap-8">
 			<!-- Self-Hosted Open-Source -->
 			<div class="bg-slate-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 flex flex-col justify-between space-y-8 relative group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
 				<div class="space-y-6">
@@ -318,101 +297,6 @@
 				</a>
 			</div>
 
-			<!-- Managed Cloud SaaS -->
-			<div class="bg-slate-100/80 dark:bg-[#0c1322]/80 border border-emerald-300 dark:border-emerald-500/20 rounded-2xl p-8 flex flex-col justify-between space-y-8 relative shadow-lg dark:shadow-xl dark:shadow-emerald-500/5 glow-card" onmousemove={handleMouseMove} role="presentation">
-				<div class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-500 text-white font-extrabold text-[10px] uppercase tracking-wider">
-					Most Popular
-				</div>
-				<div class="space-y-6">
-					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
-						{$t('pricing.cloud_title')}
-					</span>
-					<div class="flex items-baseline space-x-1">
-						<span class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">{$t('pricing.cloud_price')}</span>
-						<span class="text-gray-500 text-sm">/ {$t('pricing.cloud_period')}</span>
-					</div>
-					<p class="text-gray-600 dark:text-gray-400 text-sm">{$t('pricing.cloud_desc')}</p>
-					<hr class="border-gray-300 dark:border-gray-800" />
-					<ul class="space-y-3.5 text-sm">
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.cloud_f1')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.cloud_f2')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.cloud_f3')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.cloud_f4')}</span>
-						</li>
-					</ul>
-				</div>
-				<a
-					href="/coming-soon"
-					class="block text-center w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/10 transition-colors cursor-pointer"
-				>
-					{$t('pricing.cloud_cta')}
-				</a>
-			</div>
-
-			<!-- Enterprise / White-Label -->
-			<div class="bg-slate-50 dark:bg-gray-950/50 border border-gray-200 dark:border-gray-900 rounded-2xl p-8 flex flex-col justify-between space-y-8 relative group shadow-sm dark:shadow-none glow-card" onmousemove={handleMouseMove} role="presentation">
-				<div class="space-y-6">
-					<span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-200 dark:border-emerald-500/10 inline-block">
-						{$t('pricing.ent_title')}
-					</span>
-					<div class="flex items-baseline space-x-1">
-						<span class="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white">{$t('pricing.ent_price')}</span>
-					</div>
-					<p class="text-gray-600 dark:text-gray-400 text-sm">{$t('pricing.ent_desc')}</p>
-					<hr class="border-gray-200 dark:border-gray-900" />
-					<ul class="space-y-3.5 text-sm">
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.ent_f1')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.ent_f2')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.ent_f3')}</span>
-						</li>
-						<li class="flex items-start space-x-3 text-gray-700 dark:text-gray-300">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-							</svg>
-							<span>{$t('pricing.ent_f4')}</span>
-						</li>
-					</ul>
-				</div>
-				<a
-					href="https://wa.me/628123456789"
-					class="block text-center w-full bg-gray-900 dark:bg-white dark:hover:bg-gray-100 hover:bg-gray-800 dark:text-gray-950 text-white font-bold py-3.5 rounded-xl border border-gray-800 dark:border-transparent transition-colors"
-				>
-					{$t('pricing.ent_cta')}
-				</a>
-			</div>
 		</div>
 	</div>
 </section>
@@ -456,7 +340,7 @@
 				onclick={() => toggleFaq(2)}
 				class="w-full text-left px-6 py-5 flex items-center justify-between text-gray-900 dark:text-white font-bold hover:bg-gray-100/50 dark:hover:bg-gray-900/20 transition-colors cursor-pointer"
 			>
-				<span>{$t('faq.q2')}</span>
+				<span>{$t('faq.q3')}</span>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-5 w-5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300 {openFaq === 2 ? 'rotate-180' : ''}"
@@ -470,60 +354,11 @@
 			</button>
 			{#if openFaq === 2}
 				<div class="px-6 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-900/50 pt-3">
-					{$t('faq.a2')}
-				</div>
-			{/if}
-		</div>
-
-		<!-- Question 3 -->
-		<div class="border border-gray-200 dark:border-gray-900 rounded-xl bg-white dark:bg-gray-950/20 overflow-hidden shadow-sm dark:shadow-none">
-			<button
-				onclick={() => toggleFaq(3)}
-				class="w-full text-left px-6 py-5 flex items-center justify-between text-gray-900 dark:text-white font-bold hover:bg-gray-100/50 dark:hover:bg-gray-900/20 transition-colors cursor-pointer"
-			>
-				<span>{$t('faq.q3')}</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-5 w-5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300 {openFaq === 3 ? 'rotate-180' : ''}"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					stroke-width="2"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-			{#if openFaq === 3}
-				<div class="px-6 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-900/50 pt-3">
 					{$t('faq.a3')}
 				</div>
 			{/if}
 		</div>
 
-		<!-- Question 4 -->
-		<div class="border border-gray-200 dark:border-gray-900 rounded-xl bg-white dark:bg-gray-950/20 overflow-hidden shadow-sm dark:shadow-none">
-			<button
-				onclick={() => toggleFaq(4)}
-				class="w-full text-left px-6 py-5 flex items-center justify-between text-gray-900 dark:text-white font-bold hover:bg-gray-100/50 dark:hover:bg-gray-900/20 transition-colors cursor-pointer"
-			>
-				<span>{$t('faq.q4')}</span>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-5 w-5 text-emerald-600 dark:text-emerald-400 transition-transform duration-300 {openFaq === 4 ? 'rotate-180' : ''}"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-					stroke-width="2"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-				</svg>
-			</button>
-			{#if openFaq === 4}
-				<div class="px-6 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-900/50 pt-3">
-					{$t('faq.a4')}
-				</div>
-			{/if}
-		</div>
 	</div>
 </section>
 
@@ -566,5 +401,13 @@
 	.animate-typing-dot-3 {
 		animation: typing-dot 1.2s infinite ease-in-out 0.4s;
 	}
-</style>
 
+	@media (prefers-reduced-motion: reduce) {
+		*, *::before, *::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+</style>

@@ -18,7 +18,7 @@
 		<section class="space-y-3">
 			<h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">1. Acceptance of Terms</h2>
 			<p>
-				By accessing or using the kebaikanku.id platform (either through our managed cloud service at app.kebaikanku.id or by hosting your own instance using our open-source codebase), you agree to be bound by these Terms of Service. If you are using the platform on behalf of a registered zakat institution or non-profit foundation, you represent that you have the authority to bind that entity to these terms.
+				By accessing or using the kebaikanku.id platform or hosting your own instance using our open-source codebase, you agree to be bound by these Terms of Service. If you are using the platform on behalf of a registered zakat institution or non-profit foundation, you represent that you have the authority to bind that entity to these terms.
 			</p>
 		</section>
 
@@ -38,9 +38,6 @@
 				<li>
 					<strong>Self-Hosted Instances:</strong> kebaikanku.id charges a <strong>0% platform fee</strong>. All donation payouts are routed directly through the Midtrans account configured by your organization. You are solely responsible for paying direct Midtrans transaction fees according to their terms.
 				</li>
-				<li>
-					<strong>Managed Cloud SaaS:</strong> kebaikanku.id charges a platform fee starting from <strong>1% per successful transaction</strong>. This fee is automatically deducted or billed to cover server hosting, database maintenance, updates, and setup support.
-				</li>
 			</ul>
 		</section>
 
@@ -59,11 +56,10 @@
 		<section class="space-y-3">
 			<h2 class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">5. AI Features & Accuracy (Roadmap)</h2>
 			<p>
-				The platform integrates Large Language Model (LLM) agents (via Python/CrewAI gateways) for Customer Service auto-replies, zakat calculations, and report generation. While we strive for absolute precision:
+				AI-assisted customer service, zakat calculations, and report generation are roadmap items and are not provided by the current release. If released, their terms and safeguards will be documented before use.
 			</p>
 			<ul class="list-disc pl-6 space-y-2">
-				<li>AI-generated text or calculations are suggestions and should be verified by a human administrator before finalized.</li>
-				<li>We are not liable for any discrepancies, transaction errors, or communication issues caused by automated AI agents.</li>
+				<li>Any future AI-generated text or calculations must be verified by a human administrator before finalization.</li>
 			</ul>
 		</section>
 

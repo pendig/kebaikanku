@@ -1,5 +1,5 @@
 <script>
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	onMount(() => goto('/campaigns', { replaceState: true }));
+	import Dashboard from '$lib/Dashboard.svelte';
 </script>
+
+<Dashboard initialTab="overview" />

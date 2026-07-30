@@ -1,12 +1,28 @@
 package repository
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/kebaikankuid/kebaikanku/backend/internal/domain"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
+
+func TestUpdateCampaignReturnsNotFound(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := db.AutoMigrate(&domain.Campaign{}); err != nil {
+		t.Fatal(err)
+	}
+
+	err = NewStore(db).UpdateCampaign(&domain.Campaign{ID: "missing"})
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		t.Fatalf("UpdateCampaign() error = %v, want gorm.ErrRecordNotFound", err)
+	}
+}
 
 func TestApplyPaymentStatusCountsSuccessOnce(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})

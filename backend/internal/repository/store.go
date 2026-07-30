@@ -18,7 +18,7 @@ func NewStore(db *gorm.DB) *Store {
 }
 
 func (s *Store) ListActiveCampaigns(category string, limit, offset int) ([]domain.Campaign, error) {
-	query := s.db.Where("status = ?", "active").Order("created_at desc")
+	query := s.activeCampaignQuery().Order("created_at desc")
 	if category != "" {
 		query = query.Where("category = ?", category)
 	}
@@ -28,9 +28,19 @@ func (s *Store) ListActiveCampaigns(category string, limit, offset int) ([]domai
 	return campaigns, err
 }
 
+func (s *Store) ListCampaigns(category string, limit, offset int) ([]domain.Campaign, error) {
+	query := s.db.Order("created_at desc")
+	if category != "" {
+		query = query.Where("category = ?", category)
+	}
+	var campaigns []domain.Campaign
+	err := query.Limit(limit).Offset(offset).Find(&campaigns).Error
+	return campaigns, err
+}
+
 func (s *Store) GetActiveCampaignBySlug(slug string) (*domain.Campaign, error) {
 	var campaign domain.Campaign
-	err := s.db.Where("slug = ? AND status = ?", slug, "active").First(&campaign).Error
+	err := s.activeCampaignQuery().Where("slug = ?", slug).First(&campaign).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -39,11 +49,19 @@ func (s *Store) GetActiveCampaignBySlug(slug string) (*domain.Campaign, error) {
 
 func (s *Store) GetActiveCampaignByID(id string) (*domain.Campaign, error) {
 	var campaign domain.Campaign
-	err := s.db.Where("id = ? AND status = ?", id, "active").First(&campaign).Error
+	err := s.activeCampaignQuery().Where("id = ?", id).First(&campaign).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
 	return &campaign, err
+}
+
+func (s *Store) activeCampaignQuery() *gorm.DB {
+	query := s.db.Where("status = ?", "active")
+	if s.db.Dialector.Name() == "sqlite" {
+		return query.Where("datetime(end_date) > CURRENT_TIMESTAMP")
+	}
+	return query.Where("end_date > CURRENT_TIMESTAMP")
 }
 
 func (s *Store) CreateCampaign(campaign *domain.Campaign) error {
@@ -51,7 +69,7 @@ func (s *Store) CreateCampaign(campaign *domain.Campaign) error {
 }
 
 func (s *Store) UpdateCampaign(campaign *domain.Campaign) error {
-	return s.db.Model(&domain.Campaign{}).Where("id = ?", campaign.ID).Updates(map[string]any{
+	result := s.db.Model(&domain.Campaign{}).Where("id = ?", campaign.ID).Updates(map[string]any{
 		"title":            campaign.Title,
 		"slug":             campaign.Slug,
 		"description":      campaign.Description,
@@ -63,7 +81,31 @@ func (s *Store) UpdateCampaign(campaign *domain.Campaign) error {
 		"beneficiary_note": campaign.BeneficiaryNote,
 		"target_amount":    campaign.TargetAmount,
 		"end_date":         campaign.EndDate,
-	}).Error
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (s *Store) UpdateCampaignStatus(id, status string) error {
+	result := s.db.Model(&domain.Campaign{}).Where("id = ?", id).Update("status", status)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+	return nil
+}
+
+func (s *Store) GetDefaultAdminPasswordHash() (string, error) {
+	var organization domain.Organization
+	err := s.db.Order("created_at asc").First(&organization).Error
+	return organization.PasswordHash, err
 }
 
 func (s *Store) FindOrCreateDonor(donor *domain.Donor) (*domain.Donor, error) {
@@ -83,6 +125,22 @@ func (s *Store) FindOrCreateDonor(donor *domain.Donor) (*domain.Donor, error) {
 
 func (s *Store) CreateDonation(donation *domain.Donation) error {
 	return s.db.Create(donation).Error
+}
+
+func (s *Store) GetDonationByIdempotencyKey(key string) (*domain.Donation, error) {
+	var donation domain.Donation
+	err := s.db.Where("idempotency_key = ?", key).First(&donation).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &donation, err
+}
+
+func (s *Store) SaveCheckout(donationID, token, redirectURL string) error {
+	return s.db.Model(&domain.Donation{}).Where("id = ?", donationID).Updates(map[string]any{
+		"checkout_token":        token,
+		"checkout_redirect_url": redirectURL,
+	}).Error
 }
 
 func (s *Store) UpdateDonationProvider(donationID, providerOrderID, providerStatus string) error {
@@ -141,4 +199,39 @@ func (s *Store) ListDonations(limit int) ([]domain.Donation, error) {
 	var donations []domain.Donation
 	err := s.db.Preload("Campaign").Preload("Donor").Order("created_at desc").Limit(limit).Find(&donations).Error
 	return donations, err
+}
+
+func (s *Store) ListDonationsPage(status, campaignID, sort string, limit, offset int) ([]domain.Donation, int64, error) {
+	query := s.db.Model(&domain.Donation{})
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if campaignID != "" {
+		query = query.Where("campaign_id = ?", campaignID)
+	}
+	var total int64
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	var donations []domain.Donation
+	orders := map[string]string{"latest": "created_at desc", "oldest": "created_at asc", "amount_desc": "amount desc", "amount_asc": "amount asc"}
+	err := query.Preload("Campaign").Preload("Donor").Order(orders[sort]).Limit(limit).Offset(offset).Find(&donations).Error
+	return donations, total, err
+}
+
+func (s *Store) GetPaymentSetting() (*domain.PaymentSetting, error) {
+	var setting domain.PaymentSetting
+	err := s.db.First(&setting, "id = ?", "midtrans").Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	return &setting, err
+}
+
+func (s *Store) SavePaymentSetting(setting *domain.PaymentSetting) error {
+	return s.db.Save(setting).Error
+}
+
+func (s *Store) DeletePaymentSetting() error {
+	return s.db.Delete(&domain.PaymentSetting{}, "id = ?", "midtrans").Error
 }

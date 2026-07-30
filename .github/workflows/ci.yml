@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build ./cmd/api
+
+  frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        directory: [frontend/landing, frontend/dashboard]
+    defaults:
+      run:
+        working-directory: ${{ matrix.directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.10-alpine
+        env:
+          POSTGRES_DB: kebaikanku
+          POSTGRES_USER: kebaikanku
+          POSTGRES_PASSWORD: kebaikanku
+        options: >-
+          --health-cmd "pg_isready -U kebaikanku -d kebaikanku"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - run: >-
+          docker run --rm --network host
+          -v "$PWD/backend/migrations:/migrations:ro"
+          migrate/migrate:v4.19.1
+          -path=/migrations
+          -database 'postgres://kebaikanku:kebaikanku@localhost:5432/kebaikanku?sslmode=disable&x-migrations-table=kebaikanku_migrations'
+          up
+
+  container:
+    needs: backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --tag kebaikanku-api:test backend

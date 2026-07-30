@@ -15,9 +15,12 @@ frontend/landing/.env
 frontend/landing/build/
 frontend/landing/.svelte-kit/
 frontend/landing/node_modules/
-frontend/landing/package-lock.json
 
 # Backend local configurations and builds
 backend/.env
 backend/kebaikanku.db
 backend/bin/
+
+# Production runtime configuration and database backups
+.env.production
+backups/

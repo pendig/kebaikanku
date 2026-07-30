@@ -13,20 +13,20 @@ The platform is designed for organizations that need donation ownership, transpa
 
 ## Current Status
 
-This repository is in the MVP bootstrap phase.
+This repository is ready for a controlled production pilot after the deployment checklist is completed.
 
 Completed:
-- Go REST API skeleton with config loading, SQLite/PostgreSQL database selection, GORM auto-migration, middlewares, and `GET /health`.
+- Go REST API with config loading, SQLite/PostgreSQL database selection, local AutoMigrate, tracked production SQL migrations, and health/readiness endpoints.
 - Core domain models: `Organization`, `Campaign`, `Donor`, and `Donation`.
 - Static SvelteKit landing page with Indonesian/English localization, homepage, terms, and privacy pages.
 - Alpha SvelteKit dashboard for token-gated campaign setup and donation reconciliation.
 - Architecture, database, localization, and handover documentation.
 
-Not implemented yet:
+Still required before opening the dashboard to multiple institutions:
 - Full institution signup/login and JWT auth.
 - Report APIs.
 - Midtrans integration code.
-- CI/CD workflows and production deployment automation.
+- CI checks for Go, both SvelteKit apps, and the API container image.
 
 ## Product Direction
 
@@ -68,6 +68,17 @@ curl http://localhost:8080/health
 ```
 
 See [backend/README.md](backend/README.md) for backend setup, environment variables, database notes, and current API status.
+
+### Production pilot
+
+Copy `.env.production.example` to `.env.production`, set every required secret, then run:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
+curl http://127.0.0.1:8080/readyz
+```
+
+The Compose migration job must complete before the API starts. The full backup, restore, and rollback procedure is in [the deployment guide](docs/deployment.md).
 
 ### Landing Page
 

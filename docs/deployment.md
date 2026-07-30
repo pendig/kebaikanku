@@ -51,18 +51,26 @@ The static landing page is configured at build-time using public environment var
 
 ## Backend Deployment
 
-Build:
+The production package is the API image, PostgreSQL, and a one-shot migration service. It does not expose PostgreSQL outside Docker; put a TLS reverse proxy in front of the API.
+
+1. Copy `.env.production.example` to `.env.production` and replace every placeholder. Keep this file only in the host secret store.
+2. Use a long random PostgreSQL password and URL-encode it in `MIGRATION_DATABASE_URL` if it has special URL characters.
+3. Start the stack:
 
 ```bash
-cd backend
-go build -o bin/api ./cmd/api
+docker compose --env-file .env.production -f docker-compose.production.yml up -d --build
 ```
 
-Run:
+4. Confirm migrations completed and the API is ready:
 
 ```bash
-PORT=8080 ./bin/api
+docker compose --env-file .env.production -f docker-compose.production.yml logs migrate
+curl http://127.0.0.1:8080/readyz
 ```
+
+The one-shot `bootstrap` service provisions the controlled-pilot organization before the API starts. Set `PILOT_ORGANIZATION_ID`, `PILOT_ORGANIZATION_NAME`, and `PILOT_ORGANIZATION_EMAIL`; configure the dashboard build with the same public `PUBLIC_ORGANIZATION_ID` (or retain the default `pilot-org`). Organization self-service belongs to the later multi-institution auth work.
+
+`/health` is a liveness response; `/readyz` is the endpoint for load balancers and deployment verification. The backend runs with `APP_ENV=production`, so it will not change the schema itself.
 
 Required production environment variables:
 
@@ -71,7 +79,11 @@ APP_ENV=production
 PORT=8080
 DB_DRIVER=postgres
 DB_DSN=host=... user=... password=... dbname=... port=5432 sslmode=require TimeZone=Asia/Jakarta
-JWT_SECRET=...
+ADMIN_PASSWORD=...
+ADMIN_SESSION_SECRET=...
+ADMIN_SETTINGS_ENCRYPTION_KEY=... # openssl rand -base64 32
+UPLOAD_DIR=/data/uploads
+PUBLIC_UPLOAD_BASE_URL=https://api.kebaikanku.id/uploads
 MIDTRANS_ENV=production
 MIDTRANS_SERVER_KEY=...
 MIDTRANS_CLIENT_KEY=...
@@ -107,21 +119,40 @@ PostgreSQL is recommended for:
 
 ## Backups
 
-Production deployments should define:
+Create a compressed PostgreSQL backup:
+
+```bash
+./scripts/backup-postgres.sh
+```
+
+Schedule it from the host at least daily and copy the resulting `backups/*.dump` off-host. Keep a retention period appropriate to the institution's reconciliation policy, and test restore monthly.
+
+To restore, first stop the API, then run the guarded script and start the migration/API services again:
+
+```bash
+docker compose --env-file .env.production -f docker-compose.production.yml stop api
+RESTORE_CONFIRM=restore ./scripts/restore-postgres.sh backups/kebaikanku-YYYYMMDDTHHMMSSZ.dump
+docker compose --env-file .env.production -f docker-compose.production.yml up -d migrate api
+curl http://127.0.0.1:8080/readyz
+```
+
+For an application rollback, restore the last verified backup first, then deploy the previous API image. Migrations are forward-only because deleting payment records during a down migration is not safe.
+
+Production deployments should also define:
 
 - Daily database backups.
 - Backup retention period.
 - Restore test cadence.
-- Separate storage for uploaded receipts and report assets once uploads exist.
+- Keep the `/data/uploads` volume persistent and include it in the backup policy for campaign banners.
 
-## CI/CD Target
+## CI
 
-Recommended GitHub Actions checks:
+GitHub Actions runs:
 
 - `go test ./...` in `backend`.
 - `go vet ./...` in `backend`.
-- `npm ci` and `npm run build` in `frontend/landing`.
-- Later: dashboard build and API integration tests.
+- `npm ci` and `npm run build` in both frontend applications.
+- API container build.
 
 ## Deployment Checklist
 
@@ -131,5 +162,9 @@ Recommended GitHub Actions checks:
 - Midtrans notification URL points to `/api/v1/payments/midtrans/notification`.
 - TLS is enabled.
 - CORS origins match deployed frontend domains.
+- `CORS_ALLOWED_ORIGINS` lists only those HTTPS origins.
 - Secrets are stored in the platform secret manager, not committed files.
 - Health check URL is monitored.
+- `/readyz` is configured as the deployment/load-balancer readiness probe.
+- Migration job completed successfully before the API release.
+- A backup was taken and its restore procedure has been tested.

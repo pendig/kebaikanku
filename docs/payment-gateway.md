@@ -30,10 +30,11 @@ Xendit is intentionally left as a future provider option. The first MVP should m
 MIDTRANS_ENV=sandbox
 MIDTRANS_SERVER_KEY=SB-Mid-server-your-server-key
 MIDTRANS_CLIENT_KEY=SB-Mid-client-your-client-key
+MIDTRANS_NOTIFICATION_URL=https://api.example.org/api/v1/payments/midtrans/notification
 MIDTRANS_NOTIFICATION_TOKEN=
 ```
 
-`MIDTRANS_NOTIFICATION_TOKEN` is optional and should not replace Midtrans signature verification. It can be used only as an additional internal guard if the deployed route sits behind a gateway rule.
+`MIDTRANS_NOTIFICATION_URL` is sent as `X-Override-Notification` when creating each Snap transaction, so the Payment Notification URL does not need to be configured manually in the Midtrans dashboard. Point it to the public API route or to a forwarding edge Worker. `MIDTRANS_NOTIFICATION_TOKEN` is only for a gateway that injects `X-Notification-Token` while forwarding; Midtrans does not send custom webhook headers. Neither setting replaces Midtrans signature verification.
 
 ## Internal Status Mapping
 

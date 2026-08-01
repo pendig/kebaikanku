@@ -6,7 +6,7 @@ This document describes the intended deployment shape for kebaikanku.id.
 
 | Component | Path | Suggested target |
 | --- | --- | --- |
-| Landing page | `frontend/landing` | Cloudflare Pages |
+| Landing page | `frontend/landing` | Cloudflare Workers Static Assets or Pages |
 | Dashboard app | `frontend/dashboard` | Static SPA host such as Cloudflare Pages |
 | Backend API | `backend` | Container host, VM, Fly.io, Railway, Render, or Kubernetes |
 | Database | SQLite/PostgreSQL | SQLite for small self-hosted trials, PostgreSQL for production |
@@ -26,20 +26,40 @@ Suggested domains:
 
 The backend CORS configuration should allow only the active landing and dashboard origins.
 
-## Landing Page on Cloudflare Pages
+## Landing Page on Cloudflare
 
-Settings:
+The repository includes `frontend/landing/wrangler.jsonc` for Workers Static Assets. With Workers Builds Git integration, use:
 
 | Setting | Value |
 | --- | --- |
 | Root directory | `frontend/landing` |
-| Build command | `npm run build` |
+| Build command | `npm ci && npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Static assets directory | `build` |
+
+Cloudflare Pages can host the same `build` output if Pages is preferred; do not mix the Pages and Workers deployment models in one project.
+
+## Dashboard on Cloudflare Pages
+
+Create a separate static project for `frontend/dashboard`:
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `frontend/dashboard` |
+| Build command | `npm ci && npm run build` |
 | Build output directory | `build` |
-| Node version | `18` or newer |
+
+Set these build-time variables:
+
+```env
+PUBLIC_API_BASE_URL=https://api.kebaikanku.id
+PUBLIC_LANDING_BASE_URL=https://kebaikanku.id
+PUBLIC_ORGANIZATION_ID=pilot-org
+```
 
 ### Environment Variables (SEO Configuration)
 
-The static landing page is configured at build-time using public environment variables. In production, these should be set in your Cloudflare Pages dashboard (or equivalent hosting platform) environment configuration.
+The static landing page is configured at build-time using public environment variables. In production, set them in the selected Cloudflare project environment.
 
 | Variable | Description | Example / Default |
 | --- | --- | --- |
@@ -94,7 +114,15 @@ PUBLIC_LANDING_URL=https://kebaikanku.id
 MIDTRANS_ENV=production
 MIDTRANS_SERVER_KEY=...
 MIDTRANS_CLIENT_KEY=...
+MIDTRANS_NOTIFICATION_URL=https://api.kebaikanku.id/api/v1/payments/midtrans/notification
 ```
+
+The API sends `MIDTRANS_NOTIFICATION_URL` to Midtrans as `X-Override-Notification` for every Snap transaction. Use one of these modes:
+
+- **Direct:** point it at the public Go API route and leave `MIDTRANS_NOTIFICATION_TOKEN` empty.
+- **Forwarded:** point it at a public edge Worker that forwards the POST and injects `X-Notification-Token`; configure the same secret as `MIDTRANS_NOTIFICATION_TOKEN` on the API.
+
+In both modes, the endpoint must use HTTPS, must not redirect, and the Go API still verifies the Midtrans signature. No manual Payment Notification URL is required in the Midtrans dashboard.
 
 ## Local PostgreSQL
 
@@ -166,7 +194,8 @@ GitHub Actions runs:
 - Production database is PostgreSQL.
 - `APP_ENV=production`.
 - Midtrans production keys are configured.
-- Midtrans notification URL points to `/api/v1/payments/midtrans/notification`.
+- `MIDTRANS_NOTIFICATION_URL` points to the public `/api/v1/payments/midtrans/notification` route or its forwarding edge Worker.
+- Direct callbacks leave `MIDTRANS_NOTIFICATION_TOKEN` empty; forwarded callbacks use a matching gateway-injected token.
 - TLS is enabled.
 - CORS origins match deployed frontend domains.
 - `CORS_ALLOWED_ORIGINS` lists only those HTTPS origins.

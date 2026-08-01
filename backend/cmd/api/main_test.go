@@ -533,6 +533,23 @@ func TestProductionAdminConfigRequiresPasswordAndSessionSecret(t *testing.T) {
 	}
 }
 
+func TestMidtransNotificationURLConfig(t *testing.T) {
+	base := config.Config{AdminPassword: "long-admin-password", AdminSessionSecret: strings.Repeat("s", 32)}
+	base.MidtransNotificationURL = " not-a-url "
+	if err := validateRuntimeConfig(&base); err == nil {
+		t.Fatal("accepted invalid notification URL")
+	}
+	base.Env = "production"
+	base.MidtransNotificationURL = "http://api.example.test/notification"
+	if err := validateRuntimeConfig(&base); err == nil {
+		t.Fatal("production accepted HTTP notification URL")
+	}
+	base.MidtransNotificationURL = " https://api.example.test/notification "
+	if err := validateRuntimeConfig(&base); err != nil || base.MidtransNotificationURL != "https://api.example.test/notification" {
+		t.Fatalf("valid notification URL rejected or not trimmed: %q, %v", base.MidtransNotificationURL, err)
+	}
+}
+
 func TestReadinessChecksDatabase(t *testing.T) {
 	_, router, _, _ := setupAPITest(t, 20)
 	ready := httptest.NewRecorder()

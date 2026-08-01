@@ -30,6 +30,7 @@ type Config struct {
 	MidtransEnv                string
 	MidtransServerKey          string
 	MidtransClientKey          string
+	MidtransNotificationURL    string
 	MidtransNotifyKey          string
 	CORSAllowedOrigins         string
 	PublicRateLimit            int
@@ -67,6 +68,7 @@ func Load() *Config {
 		MidtransEnv:                getEnv("MIDTRANS_ENV", "sandbox"),
 		MidtransServerKey:          getEnv("MIDTRANS_SERVER_KEY", ""),
 		MidtransClientKey:          getEnv("MIDTRANS_CLIENT_KEY", ""),
+		MidtransNotificationURL:    getEnv("MIDTRANS_NOTIFICATION_URL", ""),
 		MidtransNotifyKey:          getEnv("MIDTRANS_NOTIFICATION_TOKEN", ""),
 		CORSAllowedOrigins:         getEnv("CORS_ALLOWED_ORIGINS", ""),
 		PublicRateLimit:            getEnvInt("PUBLIC_RATE_LIMIT_PER_MINUTE", 120),

@@ -1,13 +1,13 @@
 # Release Alpha Checklist
 
-Target release: `v0.2.0-alpha`.
+Target release: `v0.2.1-alpha`.
 
 ## Scope
 
 - Public campaign list from `GET /api/v1/campaigns`.
 - Donor checkout form on `/campaigns`.
 - Midtrans Snap redirect from `POST /api/v1/donations`.
-- Midtrans notification callback updates donations idempotently.
+- Per-transaction Midtrans notification routing and idempotent callback updates.
 - Direct Midtrans status reconciliation and donor-facing success, pending, failed, and expired pages.
 - Password-authenticated admin dashboard with campaign management, encrypted payment settings, uploads, pagination, filters, and donation CSV export.
 - Production migrations, Docker Compose, backup/restore scripts, and CI gates.
@@ -41,8 +41,11 @@ ADMIN_SESSION_SECRET=change-this-session-secret-at-least-32-characters
 MIDTRANS_ENV=sandbox
 MIDTRANS_SERVER_KEY=SB-Mid-server-...
 MIDTRANS_CLIENT_KEY=SB-Mid-client-...
-MIDTRANS_NOTIFICATION_TOKEN=change-me-optional-extra-guard
+MIDTRANS_NOTIFICATION_URL=https://replace-with-your-public-host/api/v1/payments/midtrans/notification
+MIDTRANS_NOTIFICATION_TOKEN=
 ```
+
+`MIDTRANS_NOTIFICATION_URL` must be replaced with an HTTPS endpoint reachable by Midtrans. For a local E2E run, expose the backend first with `cloudflared tunnel --url http://localhost:8080`, then use the generated hostname plus `/api/v1/payments/midtrans/notification`. A deployed forwarding Worker may be used instead.
 
 ## Sandbox E2E
 

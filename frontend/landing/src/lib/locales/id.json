@@ -7,7 +7,12 @@
     "startFree": "Donasi Sekarang",
     "login": "Masuk Yayasan",
     "campaigns": "Kampanye",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "home": "Beranda",
+    "changeLanguage": "Ganti bahasa",
+    "changeTheme": "Ganti tema",
+    "donateNow": "Donasi sekarang",
+    "mainNavigation": "Navigasi utama"
   },
   "hero": {
     "title": "Donasi Transparan & Bebas Potongan Biaya Platform",

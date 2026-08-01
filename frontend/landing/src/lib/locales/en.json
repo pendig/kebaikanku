@@ -7,7 +7,12 @@
     "startFree": "Donate Now",
     "login": "Institution Login",
     "campaigns": "Campaigns",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "home": "Home",
+    "changeLanguage": "Change language",
+    "changeTheme": "Change theme",
+    "donateNow": "Donate now",
+    "mainNavigation": "Main navigation"
   },
   "hero": {
     "title": "Transparent Donations & Zero Platform Fee Deductions",

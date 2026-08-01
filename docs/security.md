@@ -41,12 +41,9 @@ Avoid broad wildcard origins for production deployments.
 
 ## Rate Limiting
 
-The API currently rate-limits public campaign, donation, and waitlist routes. Add separate limits for:
+The API rate-limits public campaign, donation, waitlist, and admin-login routes. Login has a stricter per-IP limit than ordinary public traffic.
 
-- Login attempts.
-- Payment callback endpoint.
-
-Payment callbacks should be protected primarily through provider signature verification, not only IP allowlists.
+Payment callbacks are protected through Midtrans signature verification; do not replace signature verification with IP allowlists.
 
 ## AI Data Handling
 

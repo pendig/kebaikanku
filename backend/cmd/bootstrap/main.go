@@ -14,7 +14,7 @@ import (
 func main() {
 	cfg := config.Load()
 	database.Init(cfg)
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(required("ADMIN_PASSWORD")), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(requiredSecret("ADMIN_PASSWORD")), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatalf("hash admin password: %v", err)
 	}
@@ -41,6 +41,14 @@ func value(key, fallback string) string {
 func required(key string) string {
 	value := strings.TrimSpace(os.Getenv(key))
 	if value == "" {
+		log.Fatalf("%s is required", key)
+	}
+	return value
+}
+
+func requiredSecret(key string) string {
+	value := os.Getenv(key)
+	if strings.TrimSpace(value) == "" {
 		log.Fatalf("%s is required", key)
 	}
 	return value

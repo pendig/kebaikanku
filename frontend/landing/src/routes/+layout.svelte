@@ -136,9 +136,9 @@
 			? 'bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 py-3 shadow-lg shadow-black/5 dark:shadow-black/10'
 			: 'bg-transparent py-5'}"
 	>
-		<div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+		<div class="max-w-7xl mx-auto flex items-center justify-between gap-2 px-4 sm:px-6">
 			<!-- Logo -->
-			<a href="/" class="flex items-center space-x-2.5 group">
+			<a href="/" class="group flex min-w-0 items-center space-x-2.5">
 				<svg xmlns="http://www.w3.org/2000/svg" class="h-9 w-9 group-hover:scale-105 transition-transform duration-300 shrink-0" viewBox="0 0 512 512">
 					<!-- Left Leaf -->
 					<path d="M 256,210 C 256,180 210,130 175,100 C 140,120 180,210 256,210 Z" fill="#4EB73D" />
@@ -149,7 +149,7 @@
 					<!-- Bowl (Smile) -->
 					<path d="M 150,230 C 150,350 362,350 362,230 L 332,230 C 332,315 180,315 180,230 Z" fill="#FAB100" stroke="#FAB100" stroke-width="8" stroke-linejoin="round" />
 				</svg>
-				<span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:text-[#4EB73D] dark:group-hover:text-[#59C648] transition-colors duration-300">
+				<span class="hidden truncate text-xl font-bold tracking-tight text-gray-900 transition-colors duration-300 group-hover:text-[#4EB73D] dark:text-white dark:group-hover:text-[#59C648] min-[360px]:inline">
 					kebaikanku<span class="text-[#FAB100] group-hover:text-[#FFA700] transition-colors">.id</span>
 				</span>
 			</a>
@@ -210,10 +210,10 @@
 					{$t('nav.startFree')}
 				</a>
 			</div>
-			<div class="flex items-center gap-2 md:hidden">
-				<button onclick={toggleLanguage} aria-label="Ganti bahasa" class="grid h-10 min-w-10 place-items-center rounded-xl border border-gray-200 bg-white/80 px-2 text-xs font-bold uppercase text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{$locale}</button>
-				<button onclick={toggleTheme} aria-label="Ganti tema" class="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 bg-white/80 text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{theme === 'dark' ? '☀' : '☾'}</button>
-				<a href="/campaigns" aria-label="Donasi sekarang" class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-r from-emerald-500 to-yellow-400 font-black text-slate-950">♥</a>
+			<div class="flex shrink-0 items-center gap-1 md:hidden">
+				<button onclick={toggleLanguage} aria-label={$t('nav.changeLanguage')} class="grid h-9 min-w-9 place-items-center rounded-lg border border-gray-200 bg-white/80 px-1.5 text-[11px] font-bold uppercase text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{$locale}</button>
+				<button onclick={toggleTheme} aria-label={$t('nav.changeTheme')} class="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 bg-white/80 text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{theme === 'dark' ? '☀' : '☾'}</button>
+				<a href="/campaigns" aria-label={$t('nav.donateNow')} class="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-r from-emerald-500 to-yellow-400 font-black text-slate-950">♥</a>
 			</div>
 		</div>
 
@@ -326,22 +326,22 @@
 		</div>
 	</footer>
 
-	<nav aria-label="Navigasi utama" class="fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 rounded-2xl border border-slate-200/80 bg-white/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-slate-950/20 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/95 md:hidden">
+	<nav aria-label={$t('nav.mainNavigation')} class="fixed inset-x-3 bottom-3 z-50 grid grid-cols-4 rounded-2xl border border-slate-200/80 bg-white/95 px-2 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-2 shadow-2xl shadow-slate-950/20 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-950/95 md:hidden">
 		<a href="/" aria-current={pathname === '/' && !hash ? 'page' : undefined} class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-bold {pathname === '/' && !hash ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}">
 			<svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" /></svg>
-			Beranda
+			{$t('nav.home')}
 		</a>
 		<a href="/campaigns" aria-current={pathname.startsWith('/campaigns') ? 'page' : undefined} class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-bold {pathname.startsWith('/campaigns') ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}">
 			<svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5h16v14H4zM8 9h8M8 13h5" /></svg>
-			Kampanye
+			{$t('nav.campaigns')}
 		</a>
 		<a href="/#pricing" aria-current={pathname === '/' && hash === '#pricing' ? 'page' : undefined} class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-bold {pathname === '/' && hash === '#pricing' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}">
 			<svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-			Biaya
+			{$t('nav.pricing')}
 		</a>
 		<a href="/#faq" aria-current={pathname === '/' && hash === '#faq' ? 'page' : undefined} class="flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-bold {pathname === '/' && hash === '#faq' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400'}">
 			<svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9" /><path stroke-linecap="round" d="M9.8 9a2.3 2.3 0 1 1 3.5 2c-.8.5-1.3 1-1.3 2M12 17h.01" /></svg>
-			FAQ
+			{$t('nav.faq')}
 		</a>
 	</nav>
 </div>

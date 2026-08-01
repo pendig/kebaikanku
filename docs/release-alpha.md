@@ -8,7 +8,9 @@ Target release: `v0.2.0-alpha`.
 - Donor checkout form on `/campaigns`.
 - Midtrans Snap redirect from `POST /api/v1/donations`.
 - Midtrans notification callback updates donations idempotently.
-- Donation CSV export for operator reconciliation.
+- Direct Midtrans status reconciliation and donor-facing success, pending, failed, and expired pages.
+- Password-authenticated admin dashboard with campaign management, encrypted payment settings, uploads, pagination, filters, and donation CSV export.
+- Production migrations, Docker Compose, backup/restore scripts, and CI gates.
 
 ## Frontend Environment
 
@@ -98,6 +100,9 @@ Confirm the exported row has `status` set to `success` and `provider_status` set
 ## Release Gate
 
 - `go test ./...` passes in `backend`.
+- `go vet ./...` passes in `backend`.
 - `npm run build` passes in `frontend/landing`.
+- `npm run build` passes in `frontend/dashboard`.
+- Production migrations and container build pass in CI.
 - Sandbox payment redirects to Midtrans.
 - Sandbox notification marks the donation as `success`; verify it from `GET /api/v1/donations/export`.

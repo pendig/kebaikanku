@@ -7,10 +7,14 @@ This document describes the intended deployment shape for kebaikanku.id.
 | Component | Path | Suggested target |
 | --- | --- | --- |
 | Landing page | `frontend/landing` | Cloudflare Pages |
-| Dashboard app | `frontend/dashboard` | Cloudflare Pages SPA, planned |
+| Dashboard app | `frontend/dashboard` | Static SPA host such as Cloudflare Pages |
 | Backend API | `backend` | Container host, VM, Fly.io, Railway, Render, or Kubernetes |
 | Database | SQLite/PostgreSQL | SQLite for small self-hosted trials, PostgreSQL for production |
 | Payment gateway | Midtrans | Sandbox for dev, production for live donations |
+
+### OpenAI Sites compatibility
+
+The current static SvelteKit frontends can be adapted for Sites, but the repository is not yet a Sites project: it has no `.openai/hosting.json` and does not emit the required Cloudflare Worker-compatible `dist/server/index.js`. Sites does not run a persistent Go or Bun server process. A Sites-native full stack must expose Worker-compatible JavaScript/TypeScript handlers and use supported bindings such as D1 for relational data and R2 for uploads. The existing Go API, PostgreSQL database, and Midtrans webhook can remain on an external HTTPS backend while Sites hosts the landing page or dashboard.
 
 ## Domains
 

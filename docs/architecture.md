@@ -76,7 +76,7 @@ kebaikanku.id/
 
 All communication between the Frontend clients and the Go Backend is done over **HTTPS REST APIs** using **JSON** as the payload serialization format:
 
-*   **Authentication**: Stateless authentication using **JSON Web Tokens (JWT)**. The token is sent in the `Authorization: Bearer <token>` header.
+*   **Authentication**: The single pilot administrator signs in with `ADMIN_PASSWORD`; the API issues a signed, time-limited `HttpOnly` session cookie. The dashboard never stores an operator token in browser storage.
 *   **CORS**: Go Backend implements secure Cross-Origin Resource Sharing rules allowing requests from landing page and dashboard domains.
 *   **Status Codes**: Standard HTTP status codes are used (`200 OK`, `201 Created`, `400 Bad Request`, `401 Unauthorized`, `403 Forbidden`, `404 Not Found`, `500 Internal Server Error`).
 *   **Error Format**: Consistent JSON error responses:

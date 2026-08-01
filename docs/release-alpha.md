@@ -8,7 +8,9 @@ Target release: `v0.2.0-alpha`.
 - Donor checkout form on `/campaigns`.
 - Midtrans Snap redirect from `POST /api/v1/donations`.
 - Midtrans notification callback updates donations idempotently.
-- Donation CSV export for operator reconciliation.
+- Direct Midtrans status reconciliation and donor-facing success, pending, failed, and expired pages.
+- Password-authenticated admin dashboard with campaign management, encrypted payment settings, uploads, pagination, filters, and donation CSV export.
+- Production migrations, Docker Compose, backup/restore scripts, and CI gates.
 
 ## Frontend Environment
 
@@ -34,7 +36,8 @@ Required for sandbox E2E:
 APP_ENV=development
 DB_DRIVER=sqlite
 DB_DSN=kebaikanku-alpha.db
-CAMPAIGN_ADMIN_TOKEN=change-me
+ADMIN_PASSWORD=change-this-admin-password
+ADMIN_SESSION_SECRET=change-this-session-secret-at-least-32-characters
 MIDTRANS_ENV=sandbox
 MIDTRANS_SERVER_KEY=SB-Mid-server-...
 MIDTRANS_CLIENT_KEY=SB-Mid-client-...
@@ -50,11 +53,14 @@ cd backend
 go run cmd/api/main.go
 ```
 
-2. Create a campaign:
+2. Login and create a campaign with the session cookie:
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/campaigns \
-  -H "Authorization: Bearer $CAMPAIGN_ADMIN_TOKEN" \
+curl -c /tmp/kebaikanku-admin-cookie.txt -X POST http://localhost:8080/api/v1/admin/login \
+  -H "Content-Type: application/json" \
+  -d '{"password":"change-this-admin-password"}'
+
+curl -b /tmp/kebaikanku-admin-cookie.txt -X POST http://localhost:8080/api/v1/campaigns \
   -H "Content-Type: application/json" \
   -d '{
     "organization_id": "pilot-org",
@@ -86,8 +92,7 @@ npm run build
 6. After payment completion, verify donation export:
 
 ```bash
-curl http://localhost:8080/api/v1/donations/export \
-  -H "Authorization: Bearer $CAMPAIGN_ADMIN_TOKEN"
+curl -b /tmp/kebaikanku-admin-cookie.txt http://localhost:8080/api/v1/donations/export
 ```
 
 Confirm the exported row has `status` set to `success` and `provider_status` set to `settlement` or `capture`.
@@ -95,6 +100,9 @@ Confirm the exported row has `status` set to `success` and `provider_status` set
 ## Release Gate
 
 - `go test ./...` passes in `backend`.
+- `go vet ./...` passes in `backend`.
 - `npm run build` passes in `frontend/landing`.
+- `npm run build` passes in `frontend/dashboard`.
+- Production migrations and container build pass in CI.
 - Sandbox payment redirects to Midtrans.
 - Sandbox notification marks the donation as `success`; verify it from `GET /api/v1/donations/export`.

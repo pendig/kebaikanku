@@ -7,6 +7,7 @@
 		"directory": "./build"
 	},
 	"vars": {
+		"API_BASE_URL": "https://api.kebaikanku.id",
 		"PUBLIC_SEO_SITE_NAME": "kebaikanku.id",
 		"PUBLIC_SEO_TITLE": "kebaikanku.id - Transparent Donation Platform",
 		"PUBLIC_SEO_DESCRIPTION": "Open-source crowdfunding and donation platform for zakat and kemanusiaan institutions. 0% platform fee for self-hosted.",

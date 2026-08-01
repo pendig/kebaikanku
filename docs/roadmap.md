@@ -4,7 +4,7 @@ This roadmap is ordered by implementation dependency, not by marketing priority.
 
 ## Phase 0: Foundation
 
-Status: mostly complete.
+Status: complete for the controlled-pilot baseline.
 
 - Repository licensing and contribution docs.
 - Go backend skeleton.
@@ -15,7 +15,7 @@ Status: mostly complete.
 
 ## Phase 1: Developer Readiness
 
-Status: in progress.
+Status: complete.
 
 - Backend README.
 - Landing README.
@@ -32,19 +32,19 @@ Exit state:
 
 ## Phase 2: Backend API Core
 
+Status: complete for the single-organization pilot; multi-institution self-service remains later work.
+
 - Add repository layer for organizations, campaigns, donors, and donations.
-- Add auth service with password hashing.
-- Add JWT creation and middleware.
-- Implement `POST /api/v1/auth/register`.
-- Implement `POST /api/v1/auth/login`.
-- Implement `GET /api/v1/campaigns`.
-- Implement `POST /api/v1/campaigns`.
+- Add password login and signed session-cookie middleware.
+- Implement public campaign reads and authenticated campaign management.
 
 Exit state:
-- Institution accounts can register, log in, and create campaigns.
+- The pilot administrator can log in and create campaigns for the bootstrapped organization.
 - Public users can list active campaigns.
 
 ## Phase 3: Donation and Midtrans MVP
+
+Status: complete.
 
 - Add Midtrans config and client.
 - Implement `POST /api/v1/donations`.
@@ -61,27 +61,28 @@ Exit state:
 
 ## Phase 4: Dashboard SPA
 
+Status: complete for the single-admin pilot.
+
 - Scaffold `frontend/dashboard`.
 - Add auth screens.
 - Add campaign list and campaign creation.
 - Add donation/payment status views.
-- Add API client and auth token handling.
+- Add API client and signed session-cookie handling.
 - Deploy as Cloudflare Pages SPA.
 
 Exit state:
-- Institutions can operate the MVP without direct API calls.
+- The pilot administrator can operate the MVP without direct API calls.
 
 ## Phase 5: Reporting and Operations
+
+Status: partially complete. Production migrations, CI, backup/restore scripts, donation CSV export, and deployment documentation are available; reports and audit logs remain.
 
 - Add campaign report model.
 - Add donor receipt and zakat certificate generation.
 - Add basic admin audit logs.
-- Add database migrations.
-- Add CI checks and deployment workflow.
-- Add backup and restore documentation.
 
 Exit state:
-- The platform is ready for a controlled pilot with real institutions.
+- The platform is ready for a controlled single-organization pilot.
 
 ## Phase 6: AI Roadmap
 

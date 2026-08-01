@@ -13,6 +13,9 @@ type Donation struct {
 	PaymentMethod         string     `gorm:"type:varchar(100);" json:"payment_method"`
 	Provider              string     `gorm:"type:varchar(100);" json:"provider"`
 	ProviderOrderID       string     `gorm:"type:varchar(191);index;" json:"provider_order_id"`
+	IdempotencyKey        *string    `gorm:"type:varchar(255);uniqueIndex;" json:"-"`
+	CheckoutToken         string     `gorm:"type:text;" json:"-"`
+	CheckoutRedirectURL   string     `gorm:"type:text;" json:"-"`
 	ProviderTransactionID string     `gorm:"type:varchar(191);index;" json:"provider_transaction_id"`
 	ProviderStatus        string     `gorm:"type:varchar(100);" json:"provider_status"`
 	ProviderPayload       string     `gorm:"type:text;" json:"-"`

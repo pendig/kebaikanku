@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -27,6 +28,16 @@ func TestMidtransCreateSnapTransaction(t *testing.T) {
 		if details["order_id"] != "donation-1" || details["gross_amount"].(float64) != 10000 {
 			t.Fatalf("unexpected transaction details: %#v", details)
 		}
+		customer := body["customer_details"].(map[string]any)
+		if _, ok := customer["phone"]; ok {
+			t.Fatalf("empty optional phone must be omitted: %#v", customer)
+		}
+		if _, ok := customer["email"]; ok {
+			t.Fatalf("empty optional email must be omitted: %#v", customer)
+		}
+		if body["callbacks"].(map[string]any)["finish"] != "https://landing.test/payments/donation-1" {
+			t.Fatalf("unexpected finish callback: %#v", body["callbacks"])
+		}
 
 		_ = json.NewEncoder(w).Encode(SnapResponse{Token: "snap-token", RedirectURL: "https://snap.test"})
 	}))
@@ -39,6 +50,7 @@ func TestMidtransCreateSnapTransaction(t *testing.T) {
 		GrossAmount: 10000,
 		DonorName:   "Budi",
 		ItemName:    "Donasi",
+		FinishURL:   "https://landing.test/payments/donation-1",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -55,5 +67,17 @@ func TestVerifyMidtransSignature(t *testing.T) {
 	}
 	if VerifyMidtransSignature("order-1", "201", "10000.00", "server-key", signature) {
 		t.Fatal("expected invalid signature")
+	}
+}
+
+func TestMidtransStatusRejectsInactiveTransaction(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_ = json.NewEncoder(w).Encode(map[string]string{"status_code": "404", "status_message": "Transaction doesn't exist."})
+	}))
+	defer server.Close()
+	client := &MidtransClient{serverKey: "server-key", baseURL: server.URL, httpClient: server.Client()}
+	_, err := client.GetTransactionStatus(context.Background(), "order-1")
+	if !errors.Is(err, ErrTransactionNotFound) {
+		t.Fatalf("inactive transaction error = %v", err)
 	}
 }

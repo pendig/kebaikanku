@@ -77,6 +77,12 @@ Cloudflare Pages settings:
 
 The current routes are prerendered static pages, so the output can be served by any static host.
 
+Campaign detail metadata is rendered at the Cloudflare edge by `functions/campaigns/[slug].js`,
+so social crawlers receive campaign-specific canonical, Open Graph, Twitter, and JSON-LD tags
+without running JavaScript. Set `API_BASE_URL` to the public backend origin and
+`PUBLIC_SEO_SITE_URL` to the public landing origin in Cloudflare Pages. If the API is unavailable,
+the function safely serves the normal static fallback page.
+
 ## Related Docs
 
 - [../../docs/deployment.md](../../docs/deployment.md)

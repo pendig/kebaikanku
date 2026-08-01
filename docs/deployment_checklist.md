@@ -24,7 +24,7 @@ Before pushing changes to the release branch, execute the following commands loc
 ### 1. Install Dependencies
 ```bash
 cd frontend/landing
-npm install
+npm ci
 ```
 
 ### 2. Run Local Build Check

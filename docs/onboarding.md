@@ -80,8 +80,9 @@ APP_ENV=development
 DB_DRIVER=postgres
 DB_DSN="host=localhost user=kebaikanku password=kebaikanku dbname=kebaikanku port=5432 sslmode=disable TimeZone=Asia/Jakarta"
 
-# JWT Auth Secret
-JWT_SECRET=super-secret-key-change-in-production
+# Single-admin dashboard login
+ADMIN_PASSWORD=replace-with-a-long-admin-password
+ADMIN_SESSION_SECRET=replace-with-at-least-32-random-characters
 
 # Midtrans Configuration (Sandbox)
 MIDTRANS_ENV=sandbox
@@ -103,63 +104,24 @@ Backend API server is running on http://localhost:8080 in development mode
 
 Use these mock JSON payloads to test backend API endpoints.
 
-### A. Authentication
+### A. Admin authentication
 
-#### Register Institution (`POST /api/v1/auth/register`)
+#### Login administrator (`POST /api/v1/admin/login`)
 - **Request Body:**
   ```json
   {
-    "name": "Yayasan Contoh Zakat",
-    "email": "admin@yayasancontoh.org",
-    "password": "strong-password-123",
-    "address": "Jl. Raya Bogor No. 12, Jakarta"
+    "password": "value-from-ADMIN_PASSWORD"
   }
   ```
-- **Response Body (Success 201):**
-  ```json
-  {
-    "success": true,
-    "data": {
-      "organization": {
-        "id": "7ca6410c-60ff-4034-8d4e-d01dfc6a382e",
-        "name": "Yayasan Contoh Zakat",
-        "email": "admin@yayasancontoh.org",
-        "status": "pending"
-      }
-    }
-  }
-  ```
-
-#### Login Institution (`POST /api/v1/auth/login`)
-- **Request Body:**
-  ```json
-  {
-    "email": "admin@yayasancontoh.org",
-    "password": "strong-password-123"
-  }
-  ```
-- **Response Body (Success 200):**
-  ```json
-  {
-    "success": true,
-    "data": {
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzA2NjQ0MDAsIm9yZ19pZCI6IjdjYTY0MTBjLTYwZmYtNDAzNC04ZDRlLWQwMWRmYzZhMzgyZSJ9...",
-      "organization": {
-        "id": "7ca6410c-60ff-4034-8d4e-d01dfc6a382e",
-        "name": "Yayasan Contoh Zakat",
-        "email": "admin@yayasancontoh.org",
-        "status": "active"
-      }
-    }
-  }
-  ```
+- **Response:** `200 OK` plus a signed `HttpOnly` session cookie. Send subsequent dashboard requests with credentials enabled.
+- Use `GET /api/v1/admin/session` to check the session and `POST /api/v1/admin/logout` to clear it.
 
 ---
 
 ### B. Campaigns
 
 #### Create Campaign (`POST /api/v1/campaigns` - Authenticated)
-- **Headers:** `Authorization: Bearer <jwt-token>`
+- **Authentication:** admin session cookie
 - **Request Body:**
   ```json
   {

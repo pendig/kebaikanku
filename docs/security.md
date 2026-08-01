@@ -8,18 +8,15 @@ Sensitive data:
 - Donor name, phone number, email, and transaction history.
 - Institution profile data.
 - Payment references and reconciliation records.
-- JWTs and password hashes.
+- Admin session cookies; account password hashes once multi-user self-service auth ships.
 - Midtrans server keys and notification payloads.
 - Future AI chat logs, receipt photos, and distribution reports.
 
 ## Authentication
 
-Planned rules:
-- Hash passwords with a modern password hashing algorithm such as bcrypt or Argon2id.
-- Never store plaintext passwords.
-- Use short-lived JWT access tokens.
-- Keep `JWT_SECRET` out of committed files.
-- Add role checks before supporting multi-user institution dashboards.
+The controlled pilot uses one `ADMIN_PASSWORD` from the backend secret store. A successful login creates a signed, time-limited, `HttpOnly` session cookie; the dashboard never stores the password or a bearer token. Keep `ADMIN_SESSION_SECRET` separate from the password in production and rotate both after suspected exposure.
+
+Multi-user institution accounts remain a later phase. That phase must hash stored passwords with a modern password hashing algorithm and add role checks.
 
 ## Payment Security
 
@@ -44,14 +41,9 @@ Avoid broad wildcard origins for production deployments.
 
 ## Rate Limiting
 
-Before launch, add rate limits for:
+The API rate-limits public campaign, donation, waitlist, and admin-login routes. Login has a stricter per-IP limit than ordinary public traffic.
 
-- Login attempts.
-- Donation creation.
-- Public campaign listing.
-- Payment callback endpoint.
-
-Payment callbacks should be protected primarily through provider signature verification, not only IP allowlists.
+Payment callbacks are protected through Midtrans signature verification; do not replace signature verification with IP allowlists.
 
 ## AI Data Handling
 
@@ -73,15 +65,15 @@ Logs should include:
 
 Logs should not include:
 - Passwords.
-- JWTs.
+- Session cookies.
 - Midtrans server keys.
 - Full Authorization headers.
 - Full donor contact details unless explicitly needed in secure audit logs.
 
 ## Pre-Launch Security Checklist
 
-- Password hashing implemented.
-- JWT secret configured outside the repo.
+- `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` configured outside the repo.
+- Admin cookies are `HttpOnly`, `Secure` in production, and time-limited.
 - Midtrans signature verification implemented and tested.
 - CORS locked to production domains.
 - Rate limiting added for auth and donation routes.

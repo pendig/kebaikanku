@@ -135,7 +135,7 @@ type Donation struct {
 
 ## 🔄 Schema Migrations
 
-We currently use GORM's `AutoMigrate` command at application startup, then record the applied schema baseline in `schema_migrations`.
+Local development uses GORM's `AutoMigrate` command at startup. Production must use the ordered SQL migrations in [`backend/migrations`](../backend/migrations), which are applied by the production Compose migration job and recorded in `kebaikanku_migrations`.
 
 ```go
 func RunMigrations() {
@@ -153,12 +153,14 @@ func RunMigrations() {
 ```
 
 > [!WARNING]
-> While `AutoMigrate` is excellent for development (SQLite), for production (PostgreSQL) we advise turning off AutoMigrate in production code and using schema tools like `golang-migrate` or GORM-native migrations manually to prevent unintended data operations.
+> `APP_ENV=production` disables AutoMigrate. Create a new forward-only migration for every production schema change and take a backup before applying it. Do not alter migration files that have already been deployed.
 
 Current tracked schema version:
 
 ```text
-20260622_alpha_mvp
+000001_initial_schema
+000002_campaign_metadata
+000003_donation_checkout_idempotency
 ```
 
-This is the alpha baseline. Future schema changes should add a new version record and rollback note before release.
+This is the initial production baseline. A production rollback restores the last verified database backup and deploys the prior API image; donations make destructive down migrations unsafe.

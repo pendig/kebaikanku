@@ -16,6 +16,8 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-go@v6
         with:
           go-version-file: backend/go.mod
@@ -35,6 +37,8 @@ jobs:
         working-directory: ${{ matrix.directory }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -61,6 +65,8 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: >-
           docker run --rm --network host
           -v "$PWD/backend/migrations:/migrations:ro"
@@ -74,4 +80,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: docker build --tag kebaikanku-api:test backend

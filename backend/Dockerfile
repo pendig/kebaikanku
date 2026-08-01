@@ -12,7 +12,9 @@ FROM alpine:3.21
 
 RUN apk add --no-cache ca-certificates \
 	&& addgroup -S app \
-	&& adduser -S -G app app
+	&& adduser -S -G app app \
+	&& mkdir -p /data/uploads \
+	&& chown app:app /data/uploads
 COPY --from=build /api /usr/local/bin/api
 COPY --from=build /bootstrap /usr/local/bin/bootstrap
 USER app

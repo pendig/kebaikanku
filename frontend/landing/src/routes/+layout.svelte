@@ -32,7 +32,7 @@
 	let theme = $state('light');
 	let pathname = $derived($page.url.pathname);
 	let hash = $derived($page.url.hash);
-	let hasRouteMetadata = $derived(/^\/campaigns\/[^/]+$/.test(pathname) || pathname.startsWith('/payments/'));
+	let hasRouteMetadata = $derived(pathname !== '/');
 
 	onMount(() => {
 		const handleScroll = () => {
@@ -80,10 +80,10 @@
 </script>
 
 <svelte:head>
-	<title>{siteTitle}</title>
 	<link rel="icon" href={favicon} />
 	<meta name="keywords" content={siteKeywords} />
 	{#if !hasRouteMetadata}
+		<title>{siteTitle}</title>
 		<meta name="description" content={siteDescription} />
 		<link rel="canonical" href={$page ? $page.url.href : siteUrl} />
 		<meta property="og:type" content="website" />
@@ -209,6 +209,11 @@
 				>
 					{$t('nav.startFree')}
 				</a>
+			</div>
+			<div class="flex items-center gap-2 md:hidden">
+				<button onclick={toggleLanguage} aria-label="Ganti bahasa" class="grid h-10 min-w-10 place-items-center rounded-xl border border-gray-200 bg-white/80 px-2 text-xs font-bold uppercase text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{$locale}</button>
+				<button onclick={toggleTheme} aria-label="Ganti tema" class="grid h-10 w-10 place-items-center rounded-xl border border-gray-200 bg-white/80 text-gray-700 dark:border-gray-800 dark:bg-gray-900/80 dark:text-gray-200">{theme === 'dark' ? '☀' : '☾'}</button>
+				<a href="/campaigns" aria-label="Donasi sekarang" class="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-r from-emerald-500 to-yellow-400 font-black text-slate-950">♥</a>
 			</div>
 		</div>
 

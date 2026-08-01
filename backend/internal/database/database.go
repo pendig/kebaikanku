@@ -40,7 +40,7 @@ func Init(cfg *config.Config) *gorm.DB {
 
 	fmt.Printf("Database connected successfully using driver: %s\n", cfg.DBDriver)
 
-	if cfg.Env == "production" {
+	if cfg.Env == "production" || cfg.Env == "prod" {
 		fmt.Println("Skipping GORM AutoMigrate in production; run tracked SQL migrations before starting the API.")
 		return DB
 	}

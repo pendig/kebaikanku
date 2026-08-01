@@ -156,8 +156,10 @@ func setupAPITest(t *testing.T, limit int) (*gorm.DB, http.Handler, *httptest.Se
 	appStore = repository.NewStore(db)
 	database.DB = db
 	appPayment = payment.NewMidtransClientWithBaseURL("server-key", snapServer.URL, snapServer.Client())
+	appPaymentServerKey = "server-key"
 	publicRequestGuard.Lock()
 	publicRequestWindow = map[string]rateLimitEntry{}
+	publicRequestCleaned = time.Time{}
 	publicRequestGuard.Unlock()
 	router, err := newRouter(appConfig)
 	if err != nil {
@@ -436,6 +438,12 @@ func TestHTTPGuards(t *testing.T) {
 		t.Fatalf("rate limit = %d: %s", second.Code, second.Body.String())
 	}
 	cookie := adminCookie(t, router)
+	for attempt := 1; attempt <= 11; attempt++ {
+		login := requestJSON(t, router, http.MethodPost, "/api/v1/admin/login", `{"password":"wrong"}`, nil)
+		if attempt == 11 && login.Code != http.StatusTooManyRequests {
+			t.Fatalf("admin login rate limit = %d: %s", login.Code, login.Body.String())
+		}
+	}
 	oversized := requestJSON(t, router, http.MethodPost, "/api/v1/campaigns", `{"x":"`+strings.Repeat("a", maxCampaignBody)+`"}`, map[string]string{"Cookie": cookie.String()})
 	if oversized.Code != http.StatusRequestEntityTooLarge {
 		t.Fatalf("oversized request = %d: %s", oversized.Code, oversized.Body.String())

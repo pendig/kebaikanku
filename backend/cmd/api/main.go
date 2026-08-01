@@ -51,13 +51,16 @@ const (
 )
 
 var (
-	publicRequestWindow = map[string]rateLimitEntry{}
-	publicRequestGuard  sync.Mutex
-	waitlistEmailRegex  = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
-	campaignSlugRegex   = regexp.MustCompile(`^[a-z0-9-]+$`)
-	appConfig           *config.Config
-	appStore            *repository.Store
-	appPayment          *payment.MidtransClient
+	publicRequestWindow  = map[string]rateLimitEntry{}
+	publicRequestGuard   sync.Mutex
+	publicRequestCleaned time.Time
+	waitlistEmailRegex   = regexp.MustCompile(`^[^\s@]+@[^\s@]+\.[^\s@]+$`)
+	campaignSlugRegex    = regexp.MustCompile(`^[a-z0-9-]+$`)
+	appConfig            *config.Config
+	appStore             *repository.Store
+	appPayment           *payment.MidtransClient
+	appPaymentServerKey  string
+	appPaymentGuard      sync.RWMutex
 )
 
 type rateLimitEntry struct {
@@ -83,12 +86,9 @@ func main() {
 		panic(fmt.Sprintf("Invalid admin authentication configuration: %v", err))
 	}
 	appStore = repository.NewStore(database.DB)
-	if isProduction(cfg) {
-		if _, _, err := effectivePaymentConfig(); err != nil {
-			panic("Invalid encrypted payment settings configuration")
-		}
+	if err := refreshPaymentClient(); err != nil {
+		panic("Invalid encrypted payment settings configuration")
 	}
-	appPayment = payment.NewMidtransClient(cfg.MidtransEnv, cfg.MidtransServerKey)
 
 	r, err := newRouter(cfg)
 	if err != nil {
@@ -131,8 +131,8 @@ func newRouter(cfg *config.Config) (*chi.Mux, error) {
 		r.Get("/api/v1/campaigns/{slug}", handleGetCampaign)
 		r.Post("/api/v1/donations", handleCreateDonation)
 		r.Get("/api/v1/donations/{id}/status", handleDonationStatus)
-		r.Post("/api/v1/admin/login", handleAdminLogin)
 	})
+	r.With(adminLoginRateLimit).Post("/api/v1/admin/login", handleAdminLogin)
 	r.Post("/api/v1/admin/logout", handleAdminLogout)
 	r.Get("/api/v1/admin/session", handleAdminSession)
 	r.Group(func(r chi.Router) {
@@ -770,6 +770,10 @@ func handlePutPaymentSettings(w http.ResponseWriter, r *http.Request) {
 			writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not reset payment settings.")
 			return
 		}
+		if err := refreshPaymentClient(); err != nil {
+			writeAPIError(w, http.StatusInternalServerError, "SETTINGS_ERROR", "Could not activate payment settings.")
+			return
+		}
 		view, _ := paymentSettingsView()
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(apiResponse{Success: true, Data: map[string]any{"payment": view}})
@@ -797,6 +801,10 @@ func handlePutPaymentSettings(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := appStore.SavePaymentSetting(&setting); err != nil {
 		writeAPIError(w, http.StatusInternalServerError, "DB_ERROR", "Could not save payment settings.")
+		return
+	}
+	if err := refreshPaymentClient(); err != nil {
+		writeAPIError(w, http.StatusInternalServerError, "SETTINGS_ERROR", "Could not activate payment settings.")
 		return
 	}
 	view, _ := paymentSettingsView()
@@ -867,23 +875,27 @@ func effectivePaymentConfig() (string, string, error) {
 }
 
 func effectivePaymentClient() (*payment.MidtransClient, error) {
-	setting, err := appStore.GetPaymentSetting()
-	if err != nil {
-		return nil, err
-	}
-	if setting == nil {
-		return appPayment, nil
-	}
-	mode, serverKey, err := effectivePaymentConfig()
-	if err != nil {
-		return nil, err
-	}
-	return payment.NewMidtransClient(mode, serverKey), nil
+	appPaymentGuard.RLock()
+	defer appPaymentGuard.RUnlock()
+	return appPayment, nil
 }
 
 func effectiveMidtransServerKey() (string, error) {
-	_, serverKey, err := effectivePaymentConfig()
-	return serverKey, err
+	appPaymentGuard.RLock()
+	defer appPaymentGuard.RUnlock()
+	return appPaymentServerKey, nil
+}
+
+func refreshPaymentClient() error {
+	mode, serverKey, err := effectivePaymentConfig()
+	if err != nil {
+		return err
+	}
+	appPaymentGuard.Lock()
+	appPayment = payment.NewMidtransClient(mode, serverKey)
+	appPaymentServerKey = serverKey
+	appPaymentGuard.Unlock()
+	return nil
 }
 
 func queryInt(r *http.Request, key string, fallback int) int {
@@ -1270,33 +1282,47 @@ func writeAPIError(w http.ResponseWriter, status int, code, message string) {
 }
 
 func publicRateLimit(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		limit := 120
+	return rateLimit(func() int {
 		if appConfig != nil && appConfig.PublicRateLimit > 0 {
-			limit = appConfig.PublicRateLimit
+			return appConfig.PublicRateLimit
 		}
-		now := time.Now().UTC()
-		key := r.URL.Path + "|" + getClientIP(r)
-		publicRequestGuard.Lock()
-		for oldKey, entry := range publicRequestWindow {
-			if now.Sub(entry.started) >= publicRateLimitWindow {
-				delete(publicRequestWindow, oldKey)
+		return 120
+	})(next)
+}
+
+func adminLoginRateLimit(next http.Handler) http.Handler {
+	return rateLimit(func() int { return 10 })(next)
+}
+
+func rateLimit(limit func() int) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			now := time.Now().UTC()
+			key := r.URL.Path + "|" + getClientIP(r)
+			publicRequestGuard.Lock()
+			if publicRequestCleaned.IsZero() || now.Sub(publicRequestCleaned) >= publicRateLimitWindow {
+				for oldKey, entry := range publicRequestWindow {
+					if now.Sub(entry.started) >= publicRateLimitWindow {
+						delete(publicRequestWindow, oldKey)
+					}
+				}
+				publicRequestCleaned = now
 			}
-		}
-		entry := publicRequestWindow[key]
-		if entry.started.IsZero() || now.Sub(entry.started) >= publicRateLimitWindow {
-			entry = rateLimitEntry{started: now}
-		}
-		entry.count++
-		publicRequestWindow[key] = entry
-		publicRequestGuard.Unlock()
-		if entry.count > limit {
-			w.Header().Set("Retry-After", strconv.Itoa(int(publicRateLimitWindow.Seconds())))
-			writeAPIError(w, http.StatusTooManyRequests, "RATE_LIMITED", "Too many requests. Please try again later.")
-			return
-		}
-		next.ServeHTTP(w, r)
-	})
+			entry := publicRequestWindow[key]
+			if entry.started.IsZero() || now.Sub(entry.started) >= publicRateLimitWindow {
+				entry = rateLimitEntry{started: now}
+			}
+			entry.count++
+			publicRequestWindow[key] = entry
+			publicRequestGuard.Unlock()
+			if entry.count > limit() {
+				w.Header().Set("Retry-After", strconv.Itoa(int(publicRateLimitWindow.Seconds())))
+				writeAPIError(w, http.StatusTooManyRequests, "RATE_LIMITED", "Too many requests. Please try again later.")
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func configuredCORS(cfg *config.Config) (cors.Options, error) {

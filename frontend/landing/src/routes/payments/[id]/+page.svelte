@@ -7,6 +7,7 @@
 	let loading = $state(true);
 	let error = $state('');
 	let timer;
+	let attempts = 0;
 
 	let kind = $derived(payment?.status === 'success'
 		? 'success'
@@ -39,12 +40,20 @@
 			const payload = await response.json().catch(() => null);
 			if (!response.ok || !payload?.success) throw new Error(payload?.error?.message || 'Status pembayaran tidak dapat diperiksa.');
 			payment = payload.data;
-			if (payment.status === 'pending') timer = setTimeout(refresh, 4000);
+			if (payment.status === 'pending' && attempts < 40) {
+				timer = setTimeout(refresh, Math.min(4000 * 2 ** Math.floor(attempts / 5), 60000));
+				attempts += 1;
+			}
 		} catch (cause) {
 			error = cause.message || 'Status pembayaran tidak dapat diperiksa.';
 		} finally {
 			loading = false;
 		}
+	}
+
+	function retry() {
+		attempts = 0;
+		refresh();
 	}
 </script>
 
@@ -82,7 +91,7 @@
 
 			<div class="mt-7 grid gap-3 sm:grid-cols-2">
 				<a href="/campaigns" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-yellow-400 px-5 py-3 text-sm font-extrabold text-slate-950"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M10 6l-6 6 6 6" /></svg> Lihat kampanye</a>
-				<button type="button" onclick={refresh} disabled={loading} aria-label="Periksa ulang status pembayaran" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 text-sm font-extrabold disabled:opacity-60 dark:border-gray-800"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6 9a7 7 0 0 1 12-2l2 5M18 15a7 7 0 0 1-12 2l-2-5" /></svg> Periksa ulang</button>
+				<button type="button" onclick={retry} disabled={loading} aria-label="Periksa ulang status pembayaran" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gray-200 px-5 py-3 text-sm font-extrabold disabled:opacity-60 dark:border-gray-800"><svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7v5h-5M4 17v-5h5" /><path d="M6 9a7 7 0 0 1 12-2l2 5M18 15a7 7 0 0 1-12 2l-2-5" /></svg> Periksa ulang</button>
 			</div>
 		</div>
 	</div>

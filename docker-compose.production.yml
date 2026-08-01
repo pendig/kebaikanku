@@ -19,7 +19,10 @@ services:
     restart: "no"
     volumes:
       - ./backend/migrations:/migrations:ro
-    command: ["-path=/migrations", "-database", "${MIGRATION_DATABASE_URL:?set MIGRATION_DATABASE_URL in .env.production}", "up"]
+    environment:
+      MIGRATION_DATABASE_URL: ${MIGRATION_DATABASE_URL:?set MIGRATION_DATABASE_URL in .env.production}
+    entrypoint: ["/bin/sh", "-c"]
+    command: ['exec /migrate -path=/migrations -database "$$MIGRATION_DATABASE_URL" up']
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +38,7 @@ services:
       DB_DSN: ${DB_DSN:?set DB_DSN in .env.production}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?set CORS_ALLOWED_ORIGINS in .env.production}
       PUBLIC_RATE_LIMIT_PER_MINUTE: ${PUBLIC_RATE_LIMIT_PER_MINUTE:-120}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env.production}
       ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?set ADMIN_SESSION_SECRET in .env.production}
       ADMIN_SETTINGS_ENCRYPTION_KEY: ${ADMIN_SETTINGS_ENCRYPTION_KEY:?set ADMIN_SETTINGS_ENCRYPTION_KEY in .env.production}
       UPLOAD_DIR: ${UPLOAD_DIR:-/data/uploads}
@@ -82,6 +85,7 @@ services:
       PILOT_ORGANIZATION_ID: ${PILOT_ORGANIZATION_ID:-pilot-org}
       PILOT_ORGANIZATION_NAME: ${PILOT_ORGANIZATION_NAME:?set PILOT_ORGANIZATION_NAME in .env.production}
       PILOT_ORGANIZATION_EMAIL: ${PILOT_ORGANIZATION_EMAIL:?set PILOT_ORGANIZATION_EMAIL in .env.production}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD in .env.production}
     depends_on:
       migrate:
         condition: service_completed_successfully

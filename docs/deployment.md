@@ -79,11 +79,14 @@ APP_ENV=production
 PORT=8080
 DB_DRIVER=postgres
 DB_DSN=host=... user=... password=... dbname=... port=5432 sslmode=require TimeZone=Asia/Jakarta
+MIGRATION_DATABASE_URL=postgres://...?...&sslmode=require&x-migrations-table=kebaikanku_migrations
+CORS_ALLOWED_ORIGINS=https://kebaikanku.id,https://app.kebaikanku.id
 ADMIN_PASSWORD=...
 ADMIN_SESSION_SECRET=...
 ADMIN_SETTINGS_ENCRYPTION_KEY=... # openssl rand -base64 32
 UPLOAD_DIR=/data/uploads
 PUBLIC_UPLOAD_BASE_URL=https://api.kebaikanku.id/uploads
+PUBLIC_LANDING_URL=https://kebaikanku.id
 MIDTRANS_ENV=production
 MIDTRANS_SERVER_KEY=...
 MIDTRANS_CLIENT_KEY=...

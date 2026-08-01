@@ -108,7 +108,13 @@
 					submitting = false;
 					return;
 				}
-				throw new Error();
+				if (payload?.error?.code === 'VALIDATION_FAILED') {
+					donationError = payload.error.message || 'Data donasi belum valid. Periksa kembali nominal dan kontak Anda.';
+					recoveryRequired = true;
+					submitting = false;
+					return;
+				}
+				throw new Error(payload?.error?.message || '');
 			}
 			const redirectUrl = payload?.data?.payment?.redirect_url;
 			if (!redirectUrl) throw new Error();
@@ -116,8 +122,8 @@
 			checkoutURL = redirectUrl;
 			persistCheckout();
 			window.location.assign(redirectUrl);
-		} catch {
-			donationError = 'Pembayaran belum dapat dimulai. Coba lagi; nominal dan data Anda tetap dipakai.';
+		} catch (error) {
+			donationError = error?.message || 'Pembayaran belum dapat dimulai. Coba lagi; nominal dan data Anda tetap dipakai.';
 			submitting = false;
 		}
 	}

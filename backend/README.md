@@ -61,6 +61,7 @@ go build -o bin/api ./cmd/api
 | `MIDTRANS_ENV` | `sandbox` | `sandbox` for development, `production` for live payments. |
 | `MIDTRANS_SERVER_KEY` | empty | Midtrans server key. Keep secret. |
 | `MIDTRANS_CLIENT_KEY` | empty | Midtrans client key for frontend Snap usage. |
+| `MIDTRANS_NOTIFICATION_URL` | empty | Public webhook URL sent per Snap transaction through `X-Override-Notification`. |
 | `MIDTRANS_NOTIFICATION_TOKEN` | empty | Optional internal token if the callback route is additionally guarded. |
 | `ADMIN_PASSWORD` | empty | Single-admin password. If empty on first install, a random password is printed once and stored only as a bcrypt hash. Explicit production values require at least 12 characters. |
 | `ADMIN_SESSION_SECRET` | empty | HMAC secret for admin session cookies. Production requires at least 32 characters. |

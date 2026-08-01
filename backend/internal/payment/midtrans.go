@@ -22,13 +22,14 @@ type MidtransClient struct {
 }
 
 type SnapRequest struct {
-	OrderID     string
-	GrossAmount int64
-	DonorName   string
-	DonorEmail  string
-	DonorPhone  string
-	ItemName    string
-	FinishURL   string
+	OrderID         string
+	GrossAmount     int64
+	DonorName       string
+	DonorEmail      string
+	DonorPhone      string
+	ItemName        string
+	FinishURL       string
+	NotificationURL string
 }
 
 type SnapResponse struct {
@@ -121,6 +122,9 @@ func (c *MidtransClient) CreateSnapTransaction(ctx context.Context, req SnapRequ
 	httpReq.Header.Set("Accept", "application/json")
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(c.serverKey+":")))
+	if req.NotificationURL != "" {
+		httpReq.Header.Set("X-Override-Notification", req.NotificationURL)
+	}
 
 	res, err := c.httpClient.Do(httpReq)
 	if err != nil {

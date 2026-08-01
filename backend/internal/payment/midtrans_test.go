@@ -19,6 +19,9 @@ func TestMidtransCreateSnapTransaction(t *testing.T) {
 		if r.Header.Get("Authorization") != wantAuth {
 			t.Fatalf("unexpected auth header")
 		}
+		if r.Header.Get("X-Override-Notification") != "https://api.test/api/v1/payments/midtrans/notification" {
+			t.Fatalf("unexpected notification URL")
+		}
 
 		var body map[string]any
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -46,11 +49,12 @@ func TestMidtransCreateSnapTransaction(t *testing.T) {
 	client := NewMidtransClient("sandbox", "server-key")
 	client.baseURL = server.URL
 	res, err := client.CreateSnapTransaction(context.Background(), SnapRequest{
-		OrderID:     "donation-1",
-		GrossAmount: 10000,
-		DonorName:   "Budi",
-		ItemName:    "Donasi",
-		FinishURL:   "https://landing.test/payments/donation-1",
+		OrderID:         "donation-1",
+		GrossAmount:     10000,
+		DonorName:       "Budi",
+		ItemName:        "Donasi",
+		FinishURL:       "https://landing.test/payments/donation-1",
+		NotificationURL: "https://api.test/api/v1/payments/midtrans/notification",
 	})
 	if err != nil {
 		t.Fatal(err)

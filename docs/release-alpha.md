@@ -41,7 +41,8 @@ ADMIN_SESSION_SECRET=change-this-session-secret-at-least-32-characters
 MIDTRANS_ENV=sandbox
 MIDTRANS_SERVER_KEY=SB-Mid-server-...
 MIDTRANS_CLIENT_KEY=SB-Mid-client-...
-MIDTRANS_NOTIFICATION_TOKEN=change-me-optional-extra-guard
+MIDTRANS_NOTIFICATION_URL=https://api.example.org/api/v1/payments/midtrans/notification
+MIDTRANS_NOTIFICATION_TOKEN=
 ```
 
 ## Sandbox E2E

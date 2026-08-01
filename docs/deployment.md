@@ -94,6 +94,7 @@ PUBLIC_LANDING_URL=https://kebaikanku.id
 MIDTRANS_ENV=production
 MIDTRANS_SERVER_KEY=...
 MIDTRANS_CLIENT_KEY=...
+MIDTRANS_NOTIFICATION_URL=https://api.kebaikanku.id/api/v1/payments/midtrans/notification
 ```
 
 ## Local PostgreSQL
@@ -166,7 +167,7 @@ GitHub Actions runs:
 - Production database is PostgreSQL.
 - `APP_ENV=production`.
 - Midtrans production keys are configured.
-- Midtrans notification URL points to `/api/v1/payments/midtrans/notification`.
+- `MIDTRANS_NOTIFICATION_URL` points to the public `/api/v1/payments/midtrans/notification` route or its forwarding edge Worker.
 - TLS is enabled.
 - CORS origins match deployed frontend domains.
 - `CORS_ALLOWED_ORIGINS` lists only those HTTPS origins.

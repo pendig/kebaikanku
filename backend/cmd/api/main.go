@@ -471,13 +471,14 @@ func handleCreateDonation(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	snap, err := paymentClient.CreateSnapTransaction(r.Context(), payment.SnapRequest{
-		OrderID:     donation.ProviderOrderID,
-		GrossAmount: grossAmount,
-		DonorName:   donorRecord.Name,
-		DonorEmail:  donorRecord.Email,
-		DonorPhone:  paymentPhone,
-		ItemName:    campaign.Title,
-		FinishURL:   strings.TrimRight(appConfig.PublicLandingURL, "/") + "/payments/" + url.PathEscape(donation.ID),
+		OrderID:         donation.ProviderOrderID,
+		GrossAmount:     grossAmount,
+		DonorName:       donorRecord.Name,
+		DonorEmail:      donorRecord.Email,
+		DonorPhone:      paymentPhone,
+		ItemName:        campaign.Title,
+		FinishURL:       strings.TrimRight(appConfig.PublicLandingURL, "/") + "/payments/" + url.PathEscape(donation.ID),
+		NotificationURL: appConfig.MidtransNotificationURL,
 	})
 	if err != nil {
 		errPayload, _ := json.Marshal(map[string]any{"snap_init_error": err.Error()})

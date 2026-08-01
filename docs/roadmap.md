@@ -39,7 +39,7 @@ Status: complete for the single-organization pilot; multi-institution self-servi
 - Implement public campaign reads and authenticated campaign management.
 
 Exit state:
-- Institution accounts can register, log in, and create campaigns.
+- The pilot administrator can log in and create campaigns for the bootstrapped organization.
 - Public users can list active campaigns.
 
 ## Phase 3: Donation and Midtrans MVP
@@ -71,7 +71,7 @@ Status: complete for the single-admin pilot.
 - Deploy as Cloudflare Pages SPA.
 
 Exit state:
-- Institutions can operate the MVP without direct API calls.
+- The pilot administrator can operate the MVP without direct API calls.
 
 ## Phase 5: Reporting and Operations
 
@@ -80,12 +80,9 @@ Status: partially complete. Production migrations, CI, backup/restore scripts, d
 - Add campaign report model.
 - Add donor receipt and zakat certificate generation.
 - Add basic admin audit logs.
-- Add database migrations.
-- Add CI checks and deployment workflow.
-- Add backup and restore documentation.
 
 Exit state:
-- The platform is ready for a controlled pilot with real institutions.
+- The platform is ready for a controlled single-organization pilot.
 
 ## Phase 6: AI Roadmap
 

@@ -64,6 +64,21 @@ func TestMidtransCreateSnapTransaction(t *testing.T) {
 	}
 }
 
+func TestMidtransOmitsEmptyNotificationOverride(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("X-Override-Notification"); got != "" {
+			t.Fatalf("unexpected notification override: %q", got)
+		}
+		_ = json.NewEncoder(w).Encode(SnapResponse{Token: "snap-token"})
+	}))
+	defer server.Close()
+
+	client := NewMidtransClientWithBaseURL("server-key", server.URL, server.Client())
+	if _, err := client.CreateSnapTransaction(context.Background(), SnapRequest{OrderID: "donation-2", GrossAmount: 10000}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestVerifyMidtransSignature(t *testing.T) {
 	signature := "ab3e0fa6b1e70ba84dc3be153ef77390bdab28edb8af7a752077af945eec9655d762b5dc4d70bf9db4d7479f2418279c66f940e01b1de266f0e584eeb468e535"
 	if !VerifyMidtransSignature("order-1", "200", "10000.00", "server-key", signature) {

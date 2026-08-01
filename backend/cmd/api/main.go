@@ -72,6 +72,9 @@ func main() {
 	// 1. Load Configurations
 	cfg := config.Load()
 	appConfig = cfg
+	if err := validateRuntimeConfig(cfg); err != nil {
+		panic(fmt.Sprintf("Invalid runtime configuration: %v", err))
+	}
 
 	// 2. Initialize Database and Auto-migrate
 	database.Init(cfg)
@@ -81,9 +84,6 @@ func main() {
 	}
 	if initialPassword != "" {
 		fmt.Printf("IMPORTANT: generated initial admin password: %s (set ADMIN_PASSWORD to replace it)\n", initialPassword)
-	}
-	if err := validateAdminConfig(cfg); err != nil {
-		panic(fmt.Sprintf("Invalid admin authentication configuration: %v", err))
 	}
 	appStore = repository.NewStore(database.DB)
 	if err := refreshPaymentClient(); err != nil {
@@ -106,7 +106,7 @@ func main() {
 }
 
 func newRouter(cfg *config.Config) (*chi.Mux, error) {
-	if err := validateAdminConfig(cfg); err != nil {
+	if err := validateRuntimeConfig(cfg); err != nil {
 		return nil, err
 	}
 	corsOptions, err := configuredCORS(cfg)
@@ -1053,6 +1053,25 @@ func validateAdminConfig(cfg *config.Config) error {
 	}
 	if len(cfg.AdminSessionSecret) < 32 {
 		return errors.New("ADMIN_SESSION_SECRET must be at least 32 characters in production")
+	}
+	return nil
+}
+
+func validateRuntimeConfig(cfg *config.Config) error {
+	if err := validateAdminConfig(cfg); err != nil {
+		return err
+	}
+	value := strings.TrimSpace(cfg.MidtransNotificationURL)
+	cfg.MidtransNotificationURL = value
+	if value == "" {
+		return nil
+	}
+	parsed, err := url.ParseRequestURI(value)
+	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") {
+		return errors.New("MIDTRANS_NOTIFICATION_URL must be an absolute HTTP(S) URL")
+	}
+	if isProduction(cfg) && parsed.Scheme != "https" {
+		return errors.New("MIDTRANS_NOTIFICATION_URL must use HTTPS in production")
 	}
 	return nil
 }

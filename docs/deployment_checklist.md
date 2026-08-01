@@ -4,16 +4,15 @@ This document is the operational checklist for deploying and validating the **ke
 
 ---
 
-## ☁️ Target Hosting Platform: Cloudflare Pages
+## ☁️ Target Hosting Platform: Cloudflare Workers Static Assets
 
-We recommend deploying the static landing page to **Cloudflare Pages** because of its native global CDN, zero-cost static tier, automatic TLS certificates, and seamless edge routing.
+The landing repository includes `wrangler.jsonc` for Workers Static Assets. The generated `build` directory can also be hosted on Pages, but one project should use only one deployment model.
 
 ### Project Configurations
-- **Framework Preset:** `SvelteKit` (or `None` with static outputs)
 - **Root Directory:** `frontend/landing`
-- **Build Command:** `npm run build`
-- **Build Output Directory:** `build`
-- **Node.js Version:** `18` or newer (Set `NODE_VERSION` environment variable to `20` in Cloudflare console)
+- **Build Command:** `npm ci && npm run build`
+- **Deploy Command:** `npx wrangler deploy`
+- **Static Assets Directory:** `build`
 
 ---
 
@@ -47,9 +46,9 @@ Visit `http://localhost:4173` and click through all routes (`/`, `/campaigns`, `
 
 If the live landing page experiences styling anomalies or broken routing post-deployment:
 
-1. **Cloudflare Pages Dashboard:** Navigate to **kebaikanku-landing > Deployments**.
+1. **Cloudflare Dashboard:** Navigate to **Workers & Pages > kebaikanku-landing > Deployments**.
 2. **Select Previous Stable Build:** Find the last successful deployment from the history.
-3. **Rollback:** Click the three dots icon next to the build and select **Rollback to this deployment**. This instantly updates the CDN routing at the edge in less than 5 seconds.
+3. **Rollback:** Select the last known-good deployment and use the available rollback action.
 
 ---
 

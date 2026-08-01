@@ -110,7 +110,7 @@ See [frontend/landing/README.md](frontend/landing/README.md) for local developme
 
 ## Payment Gateway
 
-The current payment gateway is **Midtrans**. The API creates Snap checkouts, verifies notification signatures, reconciles transaction status directly, and counts successful donations idempotently.
+The current payment gateway is **Midtrans**. The API creates Snap checkouts, supplies the notification URL per transaction, verifies notification signatures, reconciles transaction status directly, and counts successful donations idempotently.
 
 Xendit can be evaluated later behind a provider interface after the donation and callback lifecycle is stable.
 
